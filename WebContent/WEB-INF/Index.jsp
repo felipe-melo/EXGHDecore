@@ -15,5 +15,8 @@
 		<form action="Mobilia" method="post">
 			<input type="submit" name="navegacao" value="Mobilia">
 		</form>
+		<form action="Ambiente" method="post">
+			<input type="submit" name="navegacao" value="Ambiente">
+		</form>
 	</body>
 </html>
