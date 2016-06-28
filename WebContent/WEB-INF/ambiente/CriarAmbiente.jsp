@@ -17,7 +17,8 @@
 			Mobilias:<br>
 				<% Collection<Mobilia> mobilias = (Collection<Mobilia>) request.getAttribute("mobilias");
 				for (Mobilia mobilia: mobilias) {%>
-					<input type="checkbox" name="checkMobilias" value="<%=mobilia.getMobiliaID()%>"><%=mobilia.getDescricao()%><br>
+					<input type="checkbox" name="checkMobilias" value="<%=mobilia.getMobiliaID()%>"><%=mobilia.getDescricao()%>
+					<input type="text" name="quantidade-<%=mobilia.getMobiliaID()%>"><br>
 				<%}%>
 			<input type="submit" name="acaoCriar" value="criar" />
 		</form>

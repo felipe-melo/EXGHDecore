@@ -72,10 +72,15 @@ public class Quarto extends Comodo {
 			
 			int linhasAfetadas = pstmt.executeUpdate(sql);
 			
-			Conexao.closeConnection();
+			
 			
 	    	if (linhasAfetadas == 0) {
+	    		Conexao.rollBack();
+	    		Conexao.closeConnection();
 				throw new ConexaoException();
+			}else{
+				Conexao.commit();
+	    		Conexao.closeConnection();
 			}
 		}
 	}

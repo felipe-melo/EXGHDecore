@@ -15,6 +15,7 @@ import im.compIII.exghdecore.entidades.Quarto;
 import im.compIII.exghdecore.entidades.Sala;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.RelacaoException;
 import im.compIII.exghdecore.util.Constants;
 
 @WebServlet("/ServicoCriarComodo")
@@ -58,6 +59,8 @@ public class ServicoCriarComodo extends HttpServlet {
 			req.setAttribute("message", "Comodo criado com sucesso!");
 		}catch(ClassNotFoundException cnfe){
 			req.setAttribute("erro", "Valor invário para o Tipo!");
+		}catch(RelacaoException re){
+			req.setAttribute("erro", "Seleciona pelo menos um " + re.getMessage());
 		}catch(CampoVazioException cve){
 			req.setAttribute("erro", "campo " + cve.getMessage() + " é obrigatório.");
 		}catch(SQLException sqlE){

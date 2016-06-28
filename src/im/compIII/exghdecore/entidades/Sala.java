@@ -70,10 +70,15 @@ public class Sala extends Comodo {
 			
 			int linhasAfetadas = psmt.executeUpdate(sql);
 			
-			Conexao.closeConnection();
+			
 		
 			if (linhasAfetadas == 0) {
+				Conexao.rollBack();
+				Conexao.closeConnection();
 				throw new ConexaoException();
+			}else{
+				Conexao.commit();
+				Conexao.closeConnection();
 			}
 		}
 	}

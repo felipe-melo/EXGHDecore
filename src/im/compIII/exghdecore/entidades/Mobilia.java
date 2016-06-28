@@ -10,6 +10,7 @@ import java.util.Collection;
 import im.compIII.exghdecore.banco.Conexao;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.RelacaoException;
 
 public class Mobilia {
 	
@@ -65,7 +66,8 @@ public class Mobilia {
 		this.mobiliaID = mobiliaID;
 	}
 	
-	public final void salvar() throws ConexaoException, SQLException, ClassNotFoundException, NumberFormatException, CampoVazioException {
+	public final void salvar() throws ConexaoException, SQLException, ClassNotFoundException, NumberFormatException, CampoVazioException,
+				RelacaoException {
 		Conexao.initConnection();
 		
 		String sql = "INSERT INTO mobilia (DESCRICAO, CUSTO, TEMPO_ENTREGA) VALUES(?, ?, ?);";
@@ -86,11 +88,19 @@ public class Mobilia {
         
 		if (generatedKeys.next()) {
             this.setMobiliaID(generatedKeys.getLong(1));
-            Conexao.closeConnection();
         } else {
         	Conexao.closeConnection();
             throw new SQLException();
         }
+		
+		if (this.ids == null || this.ids.length == 0) {
+			Conexao.rollBack();
+			Conexao.closeConnection();
+			throw new RelacaoException("Comodo");
+		}
+		
+		Conexao.commit();
+        Conexao.closeConnection();
 		
 		for(String id: this.ids) {
 			ComodoMobilia cm = new ComodoMobilia(Integer.valueOf(id), this.getMobiliaID());
@@ -168,10 +178,13 @@ public class Mobilia {
 		
 		int linhasAfetadas = psmt.executeUpdate();
 		
-		Conexao.closeConnection();
-		
 		if (linhasAfetadas == 0) {
+			Conexao.rollBack();
+			Conexao.closeConnection();
 			throw new ConexaoException();
+		}else{
+			Conexao.commit();
+			Conexao.closeConnection();
 		}
 	}
 }

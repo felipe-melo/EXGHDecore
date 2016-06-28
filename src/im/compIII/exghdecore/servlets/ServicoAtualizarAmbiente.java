@@ -17,60 +17,67 @@ import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
 import im.compIII.exghdecore.exceptions.RelacaoException;
 
-@WebServlet("/ServicoCriarAmbiente")
-public class ServicoCriarAmbiente extends HttpServlet {
+@WebServlet("/ServicoAtualizarAmbiente")
+public class ServicoAtualizarAmbiente extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		String acao = (String) req.getParameter("acaoCriar");
+		String acao = (String) req.getParameter("acaoAtualizar");
 
 		if (acao != null) {
 			switch (acao) {
-				case "criar":
-					criar(req, resp);
-				default:
+				case "atualizar":
+					atualizar(req, resp);
+				case "voltar":
 					req.getRequestDispatcher("ServicoListarAmbiente").forward(req, resp);
+					break;
+				default:
+					
 			}
-		} else {
-			criarForm(req, resp);
+		}else{
+			buscarForm(req, resp);
 		}
 	}
 	
-	private void criarForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		
-		Collection<Mobilia> mobilias;
+	private void buscarForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
 		try {
-			mobilias = Mobilia.listarTodos();
-		} catch (ClassNotFoundException e) {
-			mobilias= new ArrayList<Mobilia>();
+			long id = Long.valueOf(req.getParameter("id"));
+			Ambiente ambiente = Ambiente.buscar(id);
+			req.setAttribute("ambiente", ambiente);
+			
+			Collection<Mobilia> mobilias;
+			
+			try {
+				mobilias = Mobilia.listarTodos();
+			} catch (ClassNotFoundException e) {
+				mobilias = new ArrayList<Mobilia>();
+				e.printStackTrace();
+			} catch (SQLException e) {
+				mobilias = new ArrayList<Mobilia>();
+				e.printStackTrace();
+			}
+			
+			req.setAttribute("mobilias", mobilias);
+			
+			req.getRequestDispatcher("WEB-INF/ambiente/AtualizarAmbiente.jsp").forward(req, resp);
+		}catch (Exception e) {
 			e.printStackTrace();
-		} catch (SQLException | ConexaoException e) {
-			mobilias = new ArrayList<Mobilia>();
-			e.printStackTrace();
+			req.setAttribute("erro", "falha ao carregar ambiente!");
+			req.setAttribute("acaoListar", "");
+			req.getRequestDispatcher("ServicoListarAmbiente").forward(req, resp);
 		}
-		
-		req.setAttribute("mobilias", mobilias);
-		
-		req.getRequestDispatcher("WEB-INF/ambiente/CriarAmbiente.jsp").forward(req, resp);
 	}
 	
-	private void criar(HttpServletRequest req, HttpServletResponse resp) {
+	private void atualizar(HttpServletRequest req, HttpServletResponse resp) {
 		int numParedes = Integer.valueOf(req.getParameter("numParedes"));
 		int numPortas = Integer.valueOf(req.getParameter("numPortas"));
-		float metragem = Integer.valueOf(req.getParameter("metragem"));
+		float metragem = Integer.valueOf(req.getParameter("tempoEntrega"));
 		String[] mobiliasId = req.getParameterValues("checkMobilias");
-		String[] quantidades = new String[mobiliasId.length];
-		
-		int i = 0;
-		for (String mob: mobiliasId) {
-			quantidades[i] = req.getParameter("quantidade-" + mob);
-			i++;
-		}
-		
+		String[] quantidades = req.getParameterValues("quantidades");
 		try{
 			Ambiente ambiente = new Ambiente(numParedes, numPortas, metragem, mobiliasId, quantidades);
 			ambiente.salvar();

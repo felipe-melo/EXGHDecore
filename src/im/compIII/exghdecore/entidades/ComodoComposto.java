@@ -10,6 +10,7 @@ import java.util.List;
 import im.compIII.exghdecore.banco.Conexao;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.RelacaoException;
 import im.compIII.exghdecore.util.Constants;
 
 public class ComodoComposto extends Comodo {
@@ -34,9 +35,9 @@ public class ComodoComposto extends Comodo {
 	}
 	
 	@Override
-	public void salvar() throws ConexaoException, SQLException, ClassNotFoundException {
+	public void salvar() throws ConexaoException, SQLException, ClassNotFoundException, RelacaoException {
 		
-		if (this.comodosIds != null) {
+		if (this.comodosIds != null && this.comodosIds.length == 0) {
 		
 			this.salvarProcted();
 			
@@ -55,9 +56,11 @@ public class ComodoComposto extends Comodo {
 					
 					stm.executeUpdate(sql);
 				}
-				
+				Conexao.commit();
 				Conexao.closeConnection();
 			}
+		}else{
+			throw new RelacaoException("Comodo");
 		}
 	}
 	

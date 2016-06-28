@@ -15,6 +15,7 @@ import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.ComodoComposto;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.RelacaoException;
 import im.compIII.exghdecore.util.Constants;
 
 @WebServlet("/ServicoCriarComodoComposto")
@@ -67,7 +68,10 @@ public class ServicoCriarComodoComposto extends HttpServlet {
 		}catch (ConexaoException ce) {
 			ce.printStackTrace();
 			req.setAttribute("erro", "Falhar na conexão com o servidor.");
-		} catch (CampoVazioException e) {
+		}catch (RelacaoException re) {
+			re.printStackTrace();
+			req.setAttribute("erro", "Seleciona pelo menos um " + re.getMessage() + ".");
+		}catch (CampoVazioException e) {
 			e.printStackTrace();
 			req.setAttribute("erro", "Campo " + e.getMessage() + " é obrigatório.");
 		}

@@ -17,6 +17,23 @@ public class Conexao {
 	public static void initConnection() throws SQLException, ClassNotFoundException {
 		Class.forName("org.h2.Driver");
 		connection = DriverManager.getConnection("jdbc:h2:tcp://localhost/~/exghDecoreDB", "admin", "admin123");
+		connection.setAutoCommit(false);
+	}
+	
+	public static void rollBack() {
+		try {
+			connection.rollback();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public static void commit() {
+		try {
+			connection.commit();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 	}
 	
 	public static PreparedStatement prepare(String sql) throws SQLException {

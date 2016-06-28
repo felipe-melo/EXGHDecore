@@ -53,7 +53,7 @@ public class Cozinha extends Comodo {
 			comodo.setComodoID(id);
 			list.add(comodo);
 		}
-		
+		Conexao.commit();
 		Conexao.closeConnection();
 		return list;
 	}
@@ -73,10 +73,13 @@ public class Cozinha extends Comodo {
 			
 			int linhasAfetadas = psmt.executeUpdate(sql);
 			
-			Conexao.closeConnection();
-		
 			if (linhasAfetadas == 0) {
+				Conexao.rollBack();
+				Conexao.closeConnection();
 				throw new ConexaoException();
+			}else{
+				Conexao.commit();
+				Conexao.closeConnection();
 			}
 		}
 	}

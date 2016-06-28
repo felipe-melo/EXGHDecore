@@ -32,6 +32,7 @@ public class ComodoMobilia {
 		Statement stm = Conexao.prepare();
 			
 		stm.executeUpdate(sql);
+		Conexao.commit();
 		Conexao.closeConnection();
 	}
 }

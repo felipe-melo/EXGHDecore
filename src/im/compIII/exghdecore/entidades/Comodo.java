@@ -11,6 +11,7 @@ import java.util.List;
 import im.compIII.exghdecore.banco.Conexao;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.RelacaoException;
 import im.compIII.exghdecore.util.Constants;
 
 public abstract class Comodo {
@@ -58,7 +59,7 @@ public abstract class Comodo {
 		return tipo;
 	}
 	
-	abstract public void salvar() throws ConexaoException, SQLException, ClassNotFoundException;
+	abstract public void salvar() throws ConexaoException, SQLException, ClassNotFoundException, RelacaoException;
 	
 	protected final void salvarProcted() throws ConexaoException, SQLException, ClassNotFoundException {
 		Conexao.initConnection();
@@ -79,6 +80,7 @@ public abstract class Comodo {
         
 		if (generatedKeys.next()) {
             this.setComodoID(generatedKeys.getLong(1));
+            Conexao.commit();
             Conexao.closeConnection();
         } else {
         	Conexao.closeConnection();
@@ -97,10 +99,13 @@ public abstract class Comodo {
 		
 		int linhasAfetadas = psmt.executeUpdate();
 		
-		Conexao.closeConnection();
-		
 		if (linhasAfetadas == 0) {
+			Conexao.rollBack();
+			Conexao.closeConnection();
 			throw new ConexaoException();
+		}else{
+			Conexao.commit();
+			Conexao.closeConnection();
 		}
 	}
 	

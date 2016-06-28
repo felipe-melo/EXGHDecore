@@ -15,6 +15,7 @@ import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.RelacaoException;
 
 @WebServlet("/ServicoCriarMobilia")
 public class ServicoCriarMobilia extends HttpServlet {
@@ -69,14 +70,18 @@ public class ServicoCriarMobilia extends HttpServlet {
 			req.setAttribute("message", "Mobilia criada com sucesso!");
 		}catch(ClassNotFoundException cnfe){
 			req.setAttribute("erro", "Valor invário para o Tipo!");
-		}catch(CampoVazioException cve){
-			req.setAttribute("erro", "campo " + cve.getMessage() + " é obrigatório.");
+		}catch(RelacaoException re){
+			req.setAttribute("erro", "A mobilia deve ter pelo menos um " + re.getMessage());
 		}catch(SQLException sqlE){
 			sqlE.printStackTrace();
 			req.setAttribute("erro", "Falha no banco dados.");
 		}catch (ConexaoException ce) {
 			ce.printStackTrace();
 			req.setAttribute("erro", "Falhar na conexão com o servidor.");
+		}catch (CampoVazioException cve) {
+			cve.printStackTrace();
+			req.setAttribute("erro", "campo " + cve.getMessage() + " é obrigatório.");
+			
 		}
 	}
 }
