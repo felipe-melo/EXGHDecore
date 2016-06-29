@@ -1,6 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="im.compIII.exghdecore.util.Constants"%>
 <%@ page import="java.util.Collection"%>
+<%@ page import="java.util.ArrayList"%>
 <%@ page import="im.compIII.exghdecore.entidades.Comodo"%>
 <%@ page import="im.compIII.exghdecore.entidades.Sala"%>
 <%@ page import="im.compIII.exghdecore.entidades.Cozinha"%>
@@ -22,26 +23,31 @@
 					<th>Descricao</th>
 					<th>Tipo</th>
 				</tr>
-				<% Collection<Comodo> comodos = (Collection<Comodo>) request.getAttribute("comodos"); 
-				for (Comodo comodo: comodos) {%>
+				<% Collection<Comodo> comodos = (Collection<Comodo>) request.getAttribute("comodos");
+				ArrayList<Long> ids = (ArrayList<Long>) request.getAttribute("ids");
+				int i = 0;
+				for (Comodo comodo: comodos) {
+					long id = ids.get(i);%>
 					<tr align="center">
-					    <td><input type="radio" name="id" value="<%=comodo.getComodoID()%>"></td>
+					    <td><input type="radio" name="id" value="<%=id%>"></td>
 					    <td><%=comodo.getDescricao()%></td>
 					    <% if(comodo instanceof Sala) { %>
-					    	<td><input type="hidden" name="tipo-<%=comodo.getComodoID()%>" value="<%=Constants.SALA%>">Sala</td>
+					    	<td><input type="hidden" name="tipo-<%=id%>" value="<%=Constants.SALA%>">Sala</td>
 					 	<%} if(comodo instanceof Quarto) { %>
-					 		<td><input type="hidden" name="tipo-<%=comodo.getComodoID()%>" value="<%=Constants.QUARTO%>">Quarto</td>
+					 		<td><input type="hidden" name="tipo-<%=id%>" value="<%=Constants.QUARTO%>">Quarto</td>
 					 	<%} if (comodo instanceof Cozinha) { %>
-					 		<td><input type="hidden" name="tipo-<%=comodo.getComodoID()%>" value="<%=Constants.COZINHA%>">Cozinha</td>
+					 		<td><input type="hidden" name="tipo-<%=id%>" value="<%=Constants.COZINHA%>">Cozinha</td>
 					 	<%}if (comodo instanceof ComodoComposto) { %>
-					 		<td><input type="hidden" name="tipo-<%=comodo.getComodoID()%>" value="<%=Constants.COMPOSTO%>">Composto</td>
+					 		<td><input type="hidden" name="tipo-<%=id%>" value="<%=Constants.COMPOSTO%>">Composto</td>
 					 	<%}%>
 					</tr>
-				<%} %>
+				<%i++;
+				} %>
 			</table>
 			
 			<input type="submit" name ="acaoListar" value = "criar">
 			<input type="submit" name ="acaoListar" value = "ver/atualizar">
+			<input type="submit" name ="acaoListar" value = "remover">
 			<input type="submit" name ="acaoListar" value = "criar composto">
 		</form>
 		<br>

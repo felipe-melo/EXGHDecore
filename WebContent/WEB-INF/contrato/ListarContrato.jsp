@@ -1,40 +1,38 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="im.compIII.exghdecore.util.Constants"%>
-<%@ page import="im.compIII.exghdecore.entidades.Mobilia"%>
 <%@ page import="java.util.Collection"%>
 <%@ page import="java.util.ArrayList"%>
+<%@ page import="im.compIII.exghdecore.entidades.Contrato"%>
+<%@ page import="im.compIII.exghdecore.util.Constants"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<title>Mobilia</title>
+		<title>Contrato</title>
 	</head>
 	<body>
-		<form name="mobilia" action="ServicoListarMobilia" method="post">
+		
+		<form name="contrato" action="ServicoListarContrato" method="post">
 			<table width="80%">
 				<tr>
 					<th>Selecione</th>
-					<th>Descricao</th>
-					<th>Custo</th>
-					<th>Tempo de Entrega</th>
+					<th>Comissão</th>
 				</tr>
-				<% Collection<Mobilia> mobilias = (Collection<Mobilia>) request.getAttribute("mobilias");
+				<% Collection<Contrato> contratos = (Collection<Contrato>) request.getAttribute("contratos");
 				ArrayList<Long> ids = (ArrayList<Long>) request.getAttribute("ids");
 				int i = 0;
-				for (Mobilia mobilia: mobilias) {%>
+				for (Contrato contrato: contratos) {
+					long id = ids.get(i);%>
 					<tr align="center">
-					    <td><input type="radio" name="id" value="<%=ids.get(i)%>"></td>
-					    <td><%=mobilia.getDescricao()%></td>
-					    <td><%=mobilia.getCusto()%></td>
-					    <td><%=mobilia.getTempoEntrega()%></td>
+					    <td><input type="radio" name="id" value="<%=id%>"></td>
+					    <td><%=contrato.getComissao()%></td>
 					</tr>
 				<%i++;
 				} %>
 			</table>
 			
 			<input type="submit" name ="acaoListar" value = "criar">
-			<input type="submit" name ="acaoListar" value = "ver/atualizar">
-			
+			<input type="submit" name ="acaoListar" value = "ver">
 		</form>
 		<br>
 		<%@include file="../messagePage.jsp" %>

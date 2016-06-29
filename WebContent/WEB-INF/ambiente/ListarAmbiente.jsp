@@ -2,11 +2,12 @@
 <%@ page import="im.compIII.exghdecore.util.Constants"%>
 <%@ page import="im.compIII.exghdecore.entidades.Ambiente"%>
 <%@ page import="java.util.Collection"%>
+<%@ page import="java.util.ArrayList"%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-		<title>Mobilia</title>
+		<title>Ambiente</title>
 	</head>
 	<body>
 		<form name="ambiente" action="ServicoListarAmbiente" method="post">
@@ -17,15 +18,18 @@
 					<th>Número de portas</th>
 					<th>Metragem</th>
 				</tr>
-				<% Collection<Ambiente> ambientes = (Collection<Ambiente>) request.getAttribute("ambientes"); 
+				<% Collection<Ambiente> ambientes = (Collection<Ambiente>) request.getAttribute("ambientes");
+				ArrayList<Long> ids = (ArrayList<Long>) request.getAttribute("ids");
+				int i = 0;
 				for (Ambiente ambiente: ambientes) {%>
 					<tr align="center">
-					    <td><input type="radio" name="id" value="<%=ambiente.getAmbienteID()%>"></td>
+					    <td><input type="radio" name="id" value="<%=ids.get(i) %>"></td>
 					    <td><%=ambiente.getNumParedes()%></td>
 					    <td><%=ambiente.getNumPortas()%></td>
 					    <td><%=ambiente.getMetragem()%></td>
 					</tr>
-				<%} %>
+				<%i++;
+				} %>
 			</table>
 			
 			<input type="submit" name ="acaoListar" value = "criar">

@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import im.compIII.exghdecore.banco.ComodoDB;
+import im.compIII.exghdecore.banco.MobiliaDB;
 import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
@@ -42,9 +44,10 @@ public class ServicoCriarMobilia extends HttpServlet {
 	private void criarForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
 		Collection<Comodo> comodos;
+		Collection<Long> ids = new ArrayList<Long>();
 		
 		try {
-			comodos = Comodo.listarTodos();
+			comodos = ComodoDB.listarTodos(ids);
 		} catch (ClassNotFoundException e) {
 			comodos = new ArrayList<Comodo>();
 			e.printStackTrace();
@@ -54,25 +57,28 @@ public class ServicoCriarMobilia extends HttpServlet {
 		}
 		
 		req.setAttribute("comodos", comodos);
+		req.setAttribute("ids", ids);
 		
 		req.getRequestDispatcher("WEB-INF/mobilia/CriarMobilia.jsp").forward(req, resp);
 	}
 	
 	private void criar(HttpServletRequest req, HttpServletResponse resp) {
-		String descricao = req.getParameter("descricao");
-		double custo = Double.valueOf(req.getParameter("custo"));
-		int tempoEntrega = Integer.valueOf(req.getParameter("tempoEntrega"));
-		String[] comodosId = req.getParameterValues("checkComodos");
-		Mobilia mobilia = null;
+		
 		try{
-			mobilia = new Mobilia(descricao, custo, tempoEntrega, comodosId);
-			mobilia.salvar();
+			String descricao = req.getParameter("descricao");
+			double custo = Double.valueOf(req.getParameter("custo"));
+			int tempoEntrega = Integer.valueOf(req.getParameter("tempoEntrega"));
+			String[] comodosId = req.getParameterValues("checkComodos");
+			
+			Mobilia mobilia = new Mobilia(descricao, custo, tempoEntrega);
+			MobiliaDB db = new MobiliaDB();
+			db.salvar(mobilia, comodosId);
 			req.setAttribute("message", "Mobilia criada com sucesso!");
-		}catch(ClassNotFoundException cnfe){
-			req.setAttribute("erro", "Valor invário para o Tipo!");
+		}catch(NumberFormatException cnfe){
+			req.setAttribute("erro", "Valores inválidos de entrada!");
 		}catch(RelacaoException re){
 			req.setAttribute("erro", "A mobilia deve ter pelo menos um " + re.getMessage());
-		}catch(SQLException sqlE){
+		}catch(SQLException | ClassNotFoundException sqlE){
 			sqlE.printStackTrace();
 			req.setAttribute("erro", "Falha no banco dados.");
 		}catch (ConexaoException ce) {
@@ -81,7 +87,6 @@ public class ServicoCriarMobilia extends HttpServlet {
 		}catch (CampoVazioException cve) {
 			cve.printStackTrace();
 			req.setAttribute("erro", "campo " + cve.getMessage() + " é obrigatório.");
-			
 		}
 	}
 }

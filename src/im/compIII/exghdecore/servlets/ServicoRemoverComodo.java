@@ -12,16 +12,12 @@ import javax.servlet.http.HttpServletResponse;
 import im.compIII.exghdecore.banco.CozinhaDB;
 import im.compIII.exghdecore.banco.QuartoDB;
 import im.compIII.exghdecore.banco.SalaDB;
-import im.compIII.exghdecore.entidades.Comodo;
-import im.compIII.exghdecore.entidades.Cozinha;
-import im.compIII.exghdecore.entidades.Quarto;
-import im.compIII.exghdecore.entidades.Sala;
-import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.NoRemoveException;
 import im.compIII.exghdecore.util.Constants;
 
-@WebServlet("/ServicoCriarComodo")
-public class ServicoCriarComodo extends HttpServlet {
+@WebServlet("/ServicoRemoverComodo")
+public class ServicoRemoverComodo extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -29,54 +25,49 @@ public class ServicoCriarComodo extends HttpServlet {
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
 		String acao = (String) req.getParameter("acaoCriar");
+		
+		if (acao == null)
+			acao = "";
 
-		if (acao != null) {
-			switch (acao) {
-				case "criar":
-					criar(req, resp);
-				default:
-					req.getRequestDispatcher("ServicoListarComodo").forward(req, resp);
-			}
-		} else {
-			criarForm(req, resp);
+		switch (acao) {
+			case "remover":
+				remover(req, resp);
+				break;
+			default:
+				req.getRequestDispatcher("ServicoListarComodo").forward(req, resp);
 		}
 	}
 	
-	private void criarForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		req.getRequestDispatcher("WEB-INF/comodo/CriarComodo.jsp").forward(req, resp);
-	}
-	
-	private void criar(HttpServletRequest req, HttpServletResponse resp) {
+	private void remover(HttpServletRequest req, HttpServletResponse resp) {
 		
 		try{
-			String descricao = req.getParameter("descricao");
-			int tipo = Integer.valueOf(req.getParameter("tipo"));
-			Comodo comodo = null;
+			long id = Long.valueOf(req.getParameter("id"));
+			int tipo = Integer.valueOf(req.getParameter("tipo-" + id));
 			
 			if (tipo == Constants.SALA) {
-				comodo = new Sala(descricao, tipo);
 				SalaDB db = new SalaDB();
-				db.salvar(comodo);
+				db.remover(id);
 			} else if (tipo == Constants.QUARTO) {
-				comodo = new Quarto(descricao, tipo);
 				QuartoDB db = new QuartoDB();
-				db.salvar(comodo);
+				db.remover(id);
 			} else if (tipo == Constants.COZINHA) {
-				comodo = new Cozinha(descricao, tipo);
 				CozinhaDB db = new CozinhaDB();
-				db.salvar(comodo);
+				db.remover(id);
 			}
-			req.setAttribute("message", "Comodo criado com sucesso!");
+			req.setAttribute("message", "Comodo removido com sucesso!");
 		}catch(ClassNotFoundException | NumberFormatException cnfe){
 			req.setAttribute("erro", "Valor invário para o Tipo!");
-		}catch(CampoVazioException cve){
-			req.setAttribute("erro", "campo " + cve.getMessage() + " é obrigatório.");
 		}catch(SQLException sqlE){
 			sqlE.printStackTrace();
 			req.setAttribute("erro", "Falha no banco dados.");
 		}catch (ConexaoException ce) {
 			ce.printStackTrace();
 			req.setAttribute("erro", "Falhar na conexão com o servidor.");
+		}catch (NoRemoveException ce) {
+			ce.printStackTrace();
+			req.setAttribute("erro", "Este comodo possiu associações não foi possível remover.");
+		}finally{
+			req.setAttribute("acaoListar", "");
 		}
 	}
 }

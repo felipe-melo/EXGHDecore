@@ -11,6 +11,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import im.compIII.exghdecore.banco.ComodoDB;
+import im.compIII.exghdecore.banco.MobiliaDB;
 import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
@@ -45,13 +47,15 @@ public class ServicoAtualizarMobilia extends HttpServlet {
 		
 		try {
 			long id = Long.valueOf(req.getParameter("id"));
-			Mobilia mobilia = Mobilia.buscar(id);
+			Mobilia mobilia = MobiliaDB.buscar(id);
 			req.setAttribute("mobilia", mobilia);
+			req.setAttribute("id", id);
 			
 			Collection<Comodo> comodos;
+			Collection<Long> ids = new ArrayList<Long>();
 			
 			try {
-				comodos = Comodo.listarTodos();
+				comodos = ComodoDB.listarTodos(ids);
 			} catch (ClassNotFoundException e) {
 				comodos = new ArrayList<Comodo>();
 				e.printStackTrace();
@@ -61,6 +65,7 @@ public class ServicoAtualizarMobilia extends HttpServlet {
 			}
 			
 			req.setAttribute("comodos", comodos);
+			req.setAttribute("ids", ids);
 			
 			req.getRequestDispatcher("WEB-INF/mobilia/AtualizarMobilia.jsp").forward(req, resp);
 		}catch (Exception e) {
@@ -77,8 +82,9 @@ public class ServicoAtualizarMobilia extends HttpServlet {
 		double custo = Double.valueOf(req.getParameter("custo"));
 		int tempoEntrega = Integer.valueOf(req.getParameter("tempoEntrega"));
 		try{
-			Mobilia mobilia = new Mobilia(id, descricao, custo, tempoEntrega);
-			mobilia.atualizar();
+			Mobilia mobilia = new Mobilia(descricao, custo, tempoEntrega);
+			MobiliaDB db = new MobiliaDB();
+			db.atualizar(id, mobilia);
 			req.setAttribute("message", "Mobilia atualizado com sucesso!");
 		}catch(ClassNotFoundException cnfe){
 			req.setAttribute("erro", "Valor invário para o Tipo!");

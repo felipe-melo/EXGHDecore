@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import im.compIII.exghdecore.banco.ComodoDB;
 import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.util.Constants;
 
@@ -26,13 +27,20 @@ public class ServicoListarComodo extends HttpServlet {
 		
 		if (req.getAttribute("acaoListar") != null)
 			acao = (String) req.getAttribute("acaoListar");
-			
+		
 		if (acao == null)
 			acao = "";
 		
 		switch (acao) {
 			case "ver/atualizar":
+				
 				String id = (String)req.getParameter("id");
+				if (id == null) {
+					req.setAttribute("erro", "Erro ao carregar Comodo.");
+					this.listar(req, resp);
+					break;
+				}
+				
 				if (((String)req.getParameter("tipo-" + id)).equals(String.valueOf(Constants.COMPOSTO))) {
 					req.getRequestDispatcher("ServicoAtualizarComodoComposto").forward(req, resp);
 				}else{
@@ -41,6 +49,15 @@ public class ServicoListarComodo extends HttpServlet {
 				break;
 			case "criar":
 				req.getRequestDispatcher("ServicoCriarComodo").forward(req, resp);
+				break;
+			case "remover":
+				id = (String)req.getParameter("id");
+				if (id == null) {
+					req.setAttribute("erro", "Selecione o Comodo a ser removido.");
+					this.listar(req, resp);
+					break;
+				}
+				req.getRequestDispatcher("ServicoRemoverComodo").forward(req, resp);
 				break;
 			case "criar composto":
 				req.getRequestDispatcher("ServicoCriarComodoComposto").forward(req, resp);
@@ -52,8 +69,9 @@ public class ServicoListarComodo extends HttpServlet {
 	
 	private void listar(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		Collection<Comodo> comodos;
+		Collection<Long> ids= new ArrayList<Long>();
 		try {
-			comodos = Comodo.listarTodos();
+			comodos = ComodoDB.listarTodos(ids);
 		} catch (SQLException e) {
 			comodos = new ArrayList<Comodo>();
 			e.printStackTrace();
@@ -63,6 +81,7 @@ public class ServicoListarComodo extends HttpServlet {
 		}
 		
 		req.setAttribute("comodos", comodos);
+		req.setAttribute("ids", ids);
 		
 		req.getRequestDispatcher("WEB-INF/comodo/ListarComodo.jsp").forward(req, resp);
 	}

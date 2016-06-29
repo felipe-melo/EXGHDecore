@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import im.compIII.exghdecore.banco.MobiliaDB;
 import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.exceptions.ConexaoException;
 
@@ -44,8 +45,9 @@ public class ServicoListarMobilia extends HttpServlet {
 	
 	private void listar(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		Collection<Mobilia> mobilias;
+		Collection<Long> ids = new ArrayList<Long>();
 		try {
-			mobilias = Mobilia.listarTodos();
+			mobilias = MobiliaDB.listarTodos(ids);
 		} catch (ConexaoException | SQLException e) {
 			mobilias = new ArrayList<Mobilia>();
 			e.printStackTrace();
@@ -55,6 +57,7 @@ public class ServicoListarMobilia extends HttpServlet {
 		}
 		
 		req.setAttribute("mobilias", mobilias);
+		req.setAttribute("ids", ids);
 		
 		req.getRequestDispatcher("WEB-INF/mobilia/ListarMobilia.jsp").forward(req, resp);
 	}

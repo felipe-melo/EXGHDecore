@@ -11,7 +11,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import im.compIII.exghdecore.banco.AmbienteDB;
+import im.compIII.exghdecore.banco.MobiliaDB;
 import im.compIII.exghdecore.entidades.Ambiente;
+import im.compIII.exghdecore.entidades.ItemVenda;
 import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
@@ -42,9 +45,10 @@ public class ServicoCriarAmbiente extends HttpServlet {
 	private void criarForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
 		Collection<Mobilia> mobilias;
+		Collection<Long> ids = new ArrayList<Long>();
 		
 		try {
-			mobilias = Mobilia.listarTodos();
+			mobilias = MobiliaDB.listarTodos(ids);
 		} catch (ClassNotFoundException e) {
 			mobilias= new ArrayList<Mobilia>();
 			e.printStackTrace();
@@ -54,6 +58,7 @@ public class ServicoCriarAmbiente extends HttpServlet {
 		}
 		
 		req.setAttribute("mobilias", mobilias);
+		req.setAttribute("ids", ids);
 		
 		req.getRequestDispatcher("WEB-INF/ambiente/CriarAmbiente.jsp").forward(req, resp);
 	}
@@ -63,17 +68,18 @@ public class ServicoCriarAmbiente extends HttpServlet {
 		int numPortas = Integer.valueOf(req.getParameter("numPortas"));
 		float metragem = Integer.valueOf(req.getParameter("metragem"));
 		String[] mobiliasId = req.getParameterValues("checkMobilias");
-		String[] quantidades = new String[mobiliasId.length];
+		int[] quantidades = new int[mobiliasId.length];
 		
 		int i = 0;
 		for (String mob: mobiliasId) {
-			quantidades[i] = req.getParameter("quantidade-" + mob);
+			quantidades[i] = Integer.valueOf(req.getParameter("quantidade-" + mob));
 			i++;
 		}
 		
 		try{
-			Ambiente ambiente = new Ambiente(numParedes, numPortas, metragem, mobiliasId, quantidades);
-			ambiente.salvar();
+			Ambiente ambiente = new Ambiente(numParedes, numPortas, metragem, new ArrayList<ItemVenda>());
+			AmbienteDB db = new AmbienteDB();
+			db.salvar(ambiente, mobiliasId, quantidades);
 			req.setAttribute("message", "Ambiente criada com sucesso!");
 		}catch(ClassNotFoundException cnfe){
 			req.setAttribute("erro", "Valor invário para o Tipo!");

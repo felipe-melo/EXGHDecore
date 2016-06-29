@@ -11,12 +11,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import im.compIII.exghdecore.banco.AmbienteDB;
-import im.compIII.exghdecore.entidades.Ambiente;
+import im.compIII.exghdecore.banco.ContratoDB;
+import im.compIII.exghdecore.entidades.Contrato;
 import im.compIII.exghdecore.exceptions.ConexaoException;
 
-@WebServlet("/ServicoListarAmbiente")
-public class ServicoListarAmbiente extends HttpServlet {
+@WebServlet("/ServicoListarContrato")
+public class ServicoListarContrato extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -32,11 +32,11 @@ public class ServicoListarAmbiente extends HttpServlet {
 			acao = "";
 		
 		switch (acao) {
-			case "ver/atualizar":
-				req.getRequestDispatcher("ServicoAtualizarAmbiente").forward(req, resp);
-				break;
 			case "criar":
-				req.getRequestDispatcher("ServicoCriarAmbiente").forward(req, resp);
+				req.getRequestDispatcher("ServicoCriarContrato").forward(req, resp);
+				break;
+			case "ver":
+				req.getRequestDispatcher("ServicoVerContrato").forward(req, resp);
 				break;
 			default:
 				this.listar(req, resp);
@@ -44,21 +44,21 @@ public class ServicoListarAmbiente extends HttpServlet {
 	}
 	
 	private void listar(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		Collection<Ambiente> ambientes;
+		Collection<Contrato> contrato;
 		Collection<Long> ids = new ArrayList<Long>();
 		try {
-			ambientes = AmbienteDB.listarTodos(ids);
+			contrato = ContratoDB.listarTodos(ids);
 		} catch (ConexaoException | SQLException e) {
-			ambientes = new ArrayList<Ambiente>();
+			contrato = new ArrayList<Contrato>();
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
-			ambientes = new ArrayList<Ambiente>();
+			contrato = new ArrayList<Contrato>();
 			e.printStackTrace();
 		}
 		
-		req.setAttribute("ambientes", ambientes);
+		req.setAttribute("contratos", contrato);
 		req.setAttribute("ids", ids);
 		
-		req.getRequestDispatcher("WEB-INF/ambiente/ListarAmbiente.jsp").forward(req, resp);
+		req.getRequestDispatcher("WEB-INF/contrato/ListarContrato.jsp").forward(req, resp);
 	}
 }

@@ -32,6 +32,9 @@ public class Index extends HttpServlet {
 			case "Ambiente":
 				req.getRequestDispatcher("ServicoListarAmbiente").forward(req,resp);
 				break;
+			case "Contrato":
+				req.getRequestDispatcher("ServicoListarContrato").forward(req,resp);
+				break;
 			default:
 				req.getRequestDispatcher("WEB-INF/Index.jsp").forward(req, resp);
 		}

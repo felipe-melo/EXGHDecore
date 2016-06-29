@@ -12,8 +12,9 @@
 	</head>
 	<body>
 		<form name="comodo" action="ServicoAtualizarComodo" method="post">
-			<% Comodo comodo = (Comodo) request.getAttribute("comodo"); %>
-			<input type="hidden" name="id" readonly="true" value="<%=comodo.getComodoID() %>" /><br>
+			<% Comodo comodo = (Comodo) request.getAttribute("comodo");
+			long id = (Long) request.getAttribute("id");%>
+			<input type="hidden" name="id" readonly="true" value="<%=id %>" /><br>
 			Descrição:<input type="text" name="descricao" value="<%=comodo.getDescricao() %>"/><br>
 			<select name="tipo" readonly="true">
 				<option value="">tipo</option>
