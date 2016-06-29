@@ -28,10 +28,18 @@ public class Contrato {
 	}
 	
 	public float valorContrato() {
-		return 0f;
+		float valor = 0;
+		for (Ambiente ambiente: ambientes) {
+			valor += ambiente.custo();
+		}
+		return valor * this.comissao;
 	}
 	
 	public int prazo() {
-		return 0;
+		int tempo = 0;
+		for (Ambiente ambiente: ambientes) {
+			tempo += ambiente.tempoEntrega();
+		}
+		return tempo;
 	}
 }
