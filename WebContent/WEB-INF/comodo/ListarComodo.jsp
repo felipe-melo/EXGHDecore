@@ -24,24 +24,21 @@
 					<th>Tipo</th>
 				</tr>
 				<% Collection<Comodo> comodos = (Collection<Comodo>) request.getAttribute("comodos");
-				ArrayList<Long> ids = (ArrayList<Long>) request.getAttribute("ids");
-				int i = 0;
-				for (Comodo comodo: comodos) {
-					long id = ids.get(i);%>
+				for (Comodo comodo: comodos) {%>
 					<tr align="center">
-					    <td><input type="radio" name="id" value="<%=id%>"></td>
+					    <td><input type="radio" name="id" value="<%=comodo.getId()%>"></td>
 					    <td><%=comodo.getDescricao()%></td>
 					    <% if(comodo instanceof Sala) { %>
-					    	<td><input type="hidden" name="tipo-<%=id%>" value="<%=Constants.SALA%>">Sala</td>
+					    	<td><input type="hidden" name="tipo-<%=comodo.getId()%>" value="<%=Constants.SALA%>">Sala</td>
 					 	<%} if(comodo instanceof Quarto) { %>
-					 		<td><input type="hidden" name="tipo-<%=id%>" value="<%=Constants.QUARTO%>">Quarto</td>
+					 		<td><input type="hidden" name="tipo-<%=comodo.getId()%>" value="<%=Constants.QUARTO%>">Quarto</td>
 					 	<%} if (comodo instanceof Cozinha) { %>
-					 		<td><input type="hidden" name="tipo-<%=id%>" value="<%=Constants.COZINHA%>">Cozinha</td>
+					 		<td><input type="hidden" name="tipo-<%=comodo.getId()%>" value="<%=Constants.COZINHA%>">Cozinha</td>
 					 	<%}if (comodo instanceof ComodoComposto) { %>
-					 		<td><input type="hidden" name="tipo-<%=id%>" value="<%=Constants.COMPOSTO%>">Composto</td>
+					 		<td><input type="hidden" name="tipo-<%=comodo.getId()%>" value="<%=Constants.COMPOSTO%>">Composto</td>
 					 	<%}%>
 					</tr>
-				<%i++;
+				<%
 				} %>
 			</table>
 			

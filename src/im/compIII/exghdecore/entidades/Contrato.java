@@ -3,28 +3,40 @@ package im.compIII.exghdecore.entidades;
 import java.util.Collection;
 
 import im.compIII.exghdecore.exceptions.CampoVazioException;
-import im.compIII.exghdecore.exceptions.RelacaoException;
 
 public class Contrato {
 	
+	private long id;
 	private float comissao;
 	private Collection<Ambiente> ambientes;
 	
-	public Contrato(float comissao, Collection<Ambiente> ambientes) throws CampoVazioException, RelacaoException {
+	public Contrato(float comissao) throws CampoVazioException {
 		this.comissao = comissao;
-		this.ambientes = ambientes;
 		if (comissao == 0 || comissao < 0)
 			throw new CampoVazioException("Comissão");
-		if (ambientes == null || ambientes.size() == 0)
-			throw new RelacaoException("Ambiente");
+	}
+	
+	public Contrato(long id, float comissao) throws CampoVazioException {
+		this.id = id;
+		this.comissao = comissao;
+		if (comissao == 0 || comissao < 0)
+			throw new CampoVazioException("Comissão");
 	}
 	
 	public float getComissao() {
 		return comissao;
 	}
 	
+	public long getId() {
+		return this.id;
+	}
+	
 	public Collection<Ambiente> getAmbientes() {
-		return ambientes;
+		return this.ambientes;
+	}
+	
+	public void setAmbientes(Collection<Ambiente> ambientes) {
+		this.ambientes = ambientes;
 	}
 	
 	public float valorContrato() {
@@ -32,7 +44,7 @@ public class Contrato {
 		for (Ambiente ambiente: ambientes) {
 			valor += ambiente.custo();
 		}
-		return valor * this.comissao;
+		return valor + (valor * this.comissao);
 	}
 	
 	public int prazo() {

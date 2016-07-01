@@ -24,7 +24,7 @@ public class ServicoRemoverComodo extends HttpServlet {
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		String acao = (String) req.getParameter("acaoCriar");
+		String acao = (String) req.getParameter("acaoListar");
 		
 		if (acao == null)
 			acao = "";
@@ -32,7 +32,6 @@ public class ServicoRemoverComodo extends HttpServlet {
 		switch (acao) {
 			case "remover":
 				remover(req, resp);
-				break;
 			default:
 				req.getRequestDispatcher("ServicoListarComodo").forward(req, resp);
 		}

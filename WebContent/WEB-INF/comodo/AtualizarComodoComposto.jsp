@@ -17,11 +17,10 @@
 			<hidden name="id" readonly="true" value="<%=id %>" /><br>
 			Descrição:<input type="text" name="descricao" value="<%=comodo.getDescricao() %>"/><br>
 			<%Collection<Comodo> comodos = (Collection<Comodo>) request.getAttribute("comodos");
-			ArrayList<Long> ids = (ArrayList<Long>) request.getAttribute("ids");
 			int i = 0;
 			for (Comodo c: comodos) {%>
-				<input type="checkbox" name="checkComodos" readonly="true" value="<%=ids.get(i)%>"><%=c.getDescricao()%><br>
-			<%i++;
+				<input type="checkbox" name="checkComodos" readonly="true" value="<%=comodo.getId()%>"><%=c.getDescricao()%><br>
+			<%
 			}%><br>
 			<input type="submit" name="acaoAtualizar" value="atualizar" />
 			<input type="submit" name="acaoAtualizar" value="voltar" />

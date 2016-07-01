@@ -41,7 +41,7 @@ public class ComodoCompostoDB {
 		}
 	}
 	
-	public static Collection<Comodo> listarTodos(Collection<Long> ids) throws SQLException, ClassNotFoundException {
+	public static Collection<Comodo> listarTodos() throws SQLException, ClassNotFoundException {
 		Conexao.initConnection();
 		
 		String sql = "SELECT DISTINCT C.COMODOID, C.DESCRICAO FROM COMODO C JOIN COMODO_COMPOSTO CC where C.COMODOID = CC.COMODOID;";
@@ -53,12 +53,11 @@ public class ComodoCompostoDB {
 		
 		while(result.next()) {
 			
-			ids.add(result.getLong("COMODOID"));
 			String descricao = result.getString("DESCRICAO");
 			
 			Comodo comodo;
 			try {
-				comodo = new ComodoComposto(descricao, Constants.COMPOSTO);
+				comodo = new ComodoComposto(result.getLong("COMODOID"), descricao, Constants.COMPOSTO);
 			} catch (CampoVazioException e) {
 				e.printStackTrace();
 				continue;
@@ -68,5 +67,34 @@ public class ComodoCompostoDB {
 		
 		Conexao.closeConnection();
 		return list;
+	}
+	
+	public final static Comodo buscar(long id) throws SQLException, ClassNotFoundException {
+		ComodoComposto comodo = null;
+		
+		Class.forName("org.h2.Driver");
+		Conexao.initConnection();
+		
+		Collection<Comodo> componentes = new ArrayList<Comodo>();
+		
+		String sql = "SELECT * FROM COMODO C JOIN COMODO_COMPOSTO CC where C.COMODOID = CC.COMODOID and C.COMODOID = " + id + ";";
+		
+		Statement psmt = Conexao.prepare();
+		ResultSet result = psmt.executeQuery(sql);
+		
+		while(result.next()) {
+			String descricao = result.getString("DESCRICAO");
+			try {
+				if (comodo == null)
+					comodo = new ComodoComposto(id, descricao, Constants.SALA);
+				Comodo componente = Comodo.buscar(result.getLong("COMPONENTEID"));
+				componentes.add(componente);
+			} catch (CampoVazioException e) {}
+		}
+		if (comodo != null) {
+			comodo.setComodos(componentes);
+		}
+		Conexao.closeConnection();
+		return comodo;
 	}
 }

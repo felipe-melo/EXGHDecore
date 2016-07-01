@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<dataset>
+<mobilia MOBILIAID="1" descricao="Mob1" custo="12" tempo_entrega="3"/>
+<mobilia MOBILIAID="2" descricao="Mob2" custo="24" tempo_entrega="6"/>
+</dataset>

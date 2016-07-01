@@ -46,8 +46,9 @@ public class ServicoAtualizarMobilia extends HttpServlet {
 	private void buscarForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
 		try {
+			Collection<Long> comodosIds = new ArrayList<Long>();
 			long id = Long.valueOf(req.getParameter("id"));
-			Mobilia mobilia = MobiliaDB.buscar(id);
+			Mobilia mobilia = MobiliaDB.buscar(id, comodosIds);
 			req.setAttribute("mobilia", mobilia);
 			req.setAttribute("id", id);
 			
@@ -55,7 +56,7 @@ public class ServicoAtualizarMobilia extends HttpServlet {
 			Collection<Long> ids = new ArrayList<Long>();
 			
 			try {
-				comodos = ComodoDB.listarTodos(ids);
+				comodos = ComodoDB.listarTodos();
 			} catch (ClassNotFoundException e) {
 				comodos = new ArrayList<Comodo>();
 				e.printStackTrace();
@@ -65,6 +66,7 @@ public class ServicoAtualizarMobilia extends HttpServlet {
 			}
 			
 			req.setAttribute("comodos", comodos);
+			req.setAttribute("comodosIds", comodosIds);
 			req.setAttribute("ids", ids);
 			
 			req.getRequestDispatcher("WEB-INF/mobilia/AtualizarMobilia.jsp").forward(req, resp);
@@ -77,11 +79,12 @@ public class ServicoAtualizarMobilia extends HttpServlet {
 	}
 	
 	private void atualizar(HttpServletRequest req, HttpServletResponse resp) {
-		long id = Long.valueOf(req.getParameter("id"));
-		String descricao = req.getParameter("descricao");
-		double custo = Double.valueOf(req.getParameter("custo"));
-		int tempoEntrega = Integer.valueOf(req.getParameter("tempoEntrega"));
 		try{
+			long id = Long.valueOf(req.getParameter("id"));
+			String descricao = req.getParameter("descricao");
+			double custo = Double.valueOf(req.getParameter("custo"));
+			int tempoEntrega = Integer.valueOf(req.getParameter("tempoEntrega"));
+		
 			Mobilia mobilia = new Mobilia(descricao, custo, tempoEntrega);
 			MobiliaDB db = new MobiliaDB();
 			db.atualizar(id, mobilia);

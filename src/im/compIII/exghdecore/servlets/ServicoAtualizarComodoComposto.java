@@ -56,7 +56,7 @@ public class ServicoAtualizarComodoComposto extends HttpServlet {
 			req.setAttribute("id", id);
 			
 			try {
-				comodos = ComodoDB.listarTodos(ids);
+				comodos = ComodoDB.listarTodos();
 			} catch (ClassNotFoundException e) {
 				comodos = new ArrayList<Comodo>();
 				e.printStackTrace();

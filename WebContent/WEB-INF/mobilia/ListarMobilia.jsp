@@ -19,16 +19,14 @@
 					<th>Tempo de Entrega</th>
 				</tr>
 				<% Collection<Mobilia> mobilias = (Collection<Mobilia>) request.getAttribute("mobilias");
-				ArrayList<Long> ids = (ArrayList<Long>) request.getAttribute("ids");
-				int i = 0;
 				for (Mobilia mobilia: mobilias) {%>
 					<tr align="center">
-					    <td><input type="radio" name="id" value="<%=ids.get(i)%>"></td>
+					    <td><input type="radio" name="id" value="<%=mobilia.getId()%>"></td>
 					    <td><%=mobilia.getDescricao()%></td>
 					    <td><%=mobilia.getCusto()%></td>
 					    <td><%=mobilia.getTempoEntrega()%></td>
 					</tr>
-				<%i++;
+				<%
 				} %>
 			</table>
 			

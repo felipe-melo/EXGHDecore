@@ -59,7 +59,7 @@ public class MobiliaDB {
 		return id;
 	}
 	
-	public static Collection<Mobilia> listarTodos(Collection<Long> ids) throws ConexaoException, SQLException, ClassNotFoundException {
+	public static Collection<Mobilia> listarTodos() throws ConexaoException, SQLException, ClassNotFoundException {
 		Conexao.initConnection();
 		
 		String sql = "SELECT * FROM MOBILIA;";
@@ -71,14 +71,13 @@ public class MobiliaDB {
 		
 		while(result.next()) {
 			
-			ids.add(result.getLong("MOBILIAID"));
 			String descricao = result.getString("DESCRICAO");
 			double custo = result.getDouble("CUSTO");
 			int tempoEntrega = result.getInt("TEMPO_ENTREGA");
 			
 			Mobilia mobilia;
 			try {
-				mobilia = new Mobilia(descricao, custo, tempoEntrega);
+				mobilia = new Mobilia(result.getLong("MOBILIAID"), descricao, custo, tempoEntrega);
 			} catch (CampoVazioException e) {
 				e.printStackTrace();
 				continue;
@@ -90,26 +89,30 @@ public class MobiliaDB {
 		return list;
 	}
 	
-	public final static Mobilia buscar(long id) throws ConexaoException, SQLException, ClassNotFoundException {
+	public final static Mobilia buscar(long id, Collection<Long> comodosIds) throws ConexaoException, SQLException, ClassNotFoundException {
 		Mobilia mobilia = null;
 		
 		Conexao.initConnection();
 		
-		String sql = "SELECT * FROM MOBILIA M where M.MOBILIAID = " + id + ";";
+		String sql = "SELECT * FROM MOBILIA M JOIN COMODO_MOBILIA CM where CM.MOBILIAID = M.MOBILIAID AND M.MOBILIAID = " + id + ";";
 		
 		Statement psmt = Conexao.prepare();
 		ResultSet result = psmt.executeQuery(sql);
 		
-		if(result.next()) {
-			String descricao = result.getString("DESCRICAO");
-			double custo = result.getDouble("CUSTO");
-			int tempoEntrega = result.getInt("TEMPO_ENTREGA");
-			try {
-				mobilia = new Mobilia(descricao, custo, tempoEntrega);
-				Conexao.closeConnection();
-				return mobilia;
-			} catch (CampoVazioException e) {}
+		String descricao = "";
+		double custo = 0;
+		int tempoEntrega = 0;
+		
+		while(result.next()) {
+			descricao = result.getString("DESCRICAO");
+			custo = result.getDouble("CUSTO");
+			tempoEntrega = result.getInt("TEMPO_ENTREGA");
+			comodosIds.add(result.getLong("COMODOID"));
 		}
+		try {
+			if (!descricao.equals(""))
+				mobilia = new Mobilia(id, descricao, custo, tempoEntrega);
+		} catch (CampoVazioException e) {}
 		Conexao.closeConnection();
 		return mobilia;
 	}

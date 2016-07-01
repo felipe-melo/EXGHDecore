@@ -45,9 +45,8 @@ public class ServicoListarAmbiente extends HttpServlet {
 	
 	private void listar(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		Collection<Ambiente> ambientes;
-		Collection<Long> ids = new ArrayList<Long>();
 		try {
-			ambientes = AmbienteDB.listarTodos(ids);
+			ambientes = AmbienteDB.listarTodos();
 		} catch (ConexaoException | SQLException e) {
 			ambientes = new ArrayList<Ambiente>();
 			e.printStackTrace();
@@ -57,7 +56,6 @@ public class ServicoListarAmbiente extends HttpServlet {
 		}
 		
 		req.setAttribute("ambientes", ambientes);
-		req.setAttribute("ids", ids);
 		
 		req.getRequestDispatcher("WEB-INF/ambiente/ListarAmbiente.jsp").forward(req, resp);
 	}

@@ -47,7 +47,7 @@ public class ServicoListarMobilia extends HttpServlet {
 		Collection<Mobilia> mobilias;
 		Collection<Long> ids = new ArrayList<Long>();
 		try {
-			mobilias = MobiliaDB.listarTodos(ids);
+			mobilias = MobiliaDB.listarTodos();
 		} catch (ConexaoException | SQLException e) {
 			mobilias = new ArrayList<Mobilia>();
 			e.printStackTrace();

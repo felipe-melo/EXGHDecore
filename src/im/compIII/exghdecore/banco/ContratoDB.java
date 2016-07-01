@@ -9,18 +9,17 @@ import java.util.Collection;
 
 import im.compIII.exghdecore.entidades.Ambiente;
 import im.compIII.exghdecore.entidades.Contrato;
-import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
 import im.compIII.exghdecore.exceptions.RelacaoException;
 
 public class ContratoDB {
 	
-	public final long salvar(Contrato contrato, String... ambientesId) 
+	public final long salvar(Contrato contrato) 
 			throws ConexaoException, SQLException, ClassNotFoundException, NumberFormatException, RelacaoException {
 		Conexao.initConnection();
 		
-		long id;
+		long id = 0;
 		
 		String sql = "INSERT INTO contrato (COMISSAO) VALUES(?);";
 		
@@ -44,21 +43,32 @@ public class ContratoDB {
             throw new SQLException();
         }
 		
-		if (ambientesId == null || ambientesId.length == 0) {
+		Conexao.commit();
+		Conexao.closeConnection();
+        
+		return id;
+	}
+	
+	public final void atualizar(Contrato contrato) 
+			throws ConexaoException, SQLException, ClassNotFoundException, NumberFormatException, RelacaoException {
+		Conexao.initConnection();
+		
+		String sql = "UPDATE CONTRATO SET COMISSAO = ? WHERE CONTRATOID = " + contrato.getId();
+		
+		PreparedStatement psmt = Conexao.prepare(sql);
+		
+		psmt.setFloat(1, contrato.getComissao());
+		
+		int linhasAfetadas = psmt.executeUpdate();
+		
+		if (linhasAfetadas == 0) {
 			Conexao.rollBack();
 			Conexao.closeConnection();
-			throw new RelacaoException("Ambiente");
+			throw new ConexaoException();
+		}else{
+			Conexao.commit();
+			Conexao.closeConnection();
 		}
-		
-		Conexao.commit();
-        Conexao.closeConnection();
-		
-		AmbienteDB db = new AmbienteDB();
-		
-		for (String ambiente: ambientesId) {
-			db.addContrato(Long.valueOf(ambiente), id);
-		}
-		return id;
 	}
 	
 	public static Collection<Contrato> listarTodos(Collection<Long> ids) throws ConexaoException, SQLException, ClassNotFoundException {
@@ -86,17 +96,14 @@ public class ContratoDB {
 				try {
 					ArrayList<Ambiente> ambientes = new ArrayList<Ambiente>();
 					ambientes.add(ambiente);
-					contrato = new Contrato(comissao, ambientes);
+					contrato = new Contrato(comissao);
 				} catch (CampoVazioException e) {
 					e.printStackTrace();
-					continue;
-				} catch (RelacaoException re) {
-					re.printStackTrace();
 					continue;
 				}
 				list.add(contrato);
 			}else if (contrato != null){
-				contrato.getAmbientes().add(ambiente);
+				//contrato.getAmbientes().add(ambiente);
 			}
 		}
 		
@@ -130,11 +137,10 @@ public class ContratoDB {
 		}
 		
 		try {
-			contrato = new Contrato(comissao, ambientes);
+			contrato = new Contrato(comissao);
+			contrato.setAmbientes(ambientes);
 		} catch (CampoVazioException e) {
 			e.printStackTrace();
-		} catch (RelacaoException re) {
-			re.printStackTrace();
 		}
 		
 		Conexao.closeConnection();

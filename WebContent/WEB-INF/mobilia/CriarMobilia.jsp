@@ -17,11 +17,9 @@
 			Tempo de Entrega:<input type="text" name="tempoEntrega" /><br><br>
 			Comodos:<br>
 				<% Collection<Comodo> comodos = (Collection<Comodo>) request.getAttribute("comodos");
-				ArrayList<Long> ids = (ArrayList<Long>) request.getAttribute("ids");
-				int i = 0;
 				for (Comodo comodo: comodos) {%>
-					<input type="checkbox" name="checkComodos" value="<%=ids.get(i)%>"><%=comodo.getDescricao()%><br>
-				<%i++;
+					<input type="checkbox" name="checkComodos" value="<%=comodo.getId()%>"><%=comodo.getDescricao()%><br>
+				<%
 				}%>
 			<input type="submit" name="acaoCriar" value="criar" />
 		</form>

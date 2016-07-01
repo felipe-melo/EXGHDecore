@@ -14,21 +14,21 @@
 			<table width="80%">
 				<tr>
 					<th>Selecione</th>
+					<th>Comissão</th>
 					<th>Número de paredes</th>
 					<th>Número de portas</th>
 					<th>Metragem</th>
 				</tr>
 				<% Collection<Ambiente> ambientes = (Collection<Ambiente>) request.getAttribute("ambientes");
-				ArrayList<Long> ids = (ArrayList<Long>) request.getAttribute("ids");
-				int i = 0;
 				for (Ambiente ambiente: ambientes) {%>
 					<tr align="center">
-					    <td><input type="radio" name="id" value="<%=ids.get(i) %>"></td>
+					    <td><input type="radio" name="id" value="<%=ambiente.getId() %>"></td>
+					    <td><%=ambiente.getContrato().getComissao()%></td>
 					    <td><%=ambiente.getNumParedes()%></td>
 					    <td><%=ambiente.getNumPortas()%></td>
 					    <td><%=ambiente.getMetragem()%></td>
 					</tr>
-				<%i++;
+				<%
 				} %>
 			</table>
 			

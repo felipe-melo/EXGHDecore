@@ -71,7 +71,7 @@ public class ServicoListarComodo extends HttpServlet {
 		Collection<Comodo> comodos;
 		Collection<Long> ids= new ArrayList<Long>();
 		try {
-			comodos = ComodoDB.listarTodos(ids);
+			comodos = ComodoDB.listarTodos();
 		} catch (SQLException e) {
 			comodos = new ArrayList<Comodo>();
 			e.printStackTrace();

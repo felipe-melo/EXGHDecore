@@ -10,6 +10,7 @@ import java.util.Collection;
 import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.ComodoComposto;
 import im.compIII.exghdecore.entidades.Cozinha;
+import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.entidades.Quarto;
 import im.compIII.exghdecore.entidades.Sala;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
@@ -48,10 +49,10 @@ public class ComodoDB {
 		return id;
 	}
 	
-	final boolean remover(long id) throws ConexaoException, SQLException, ClassNotFoundException {
+	final boolean remover(long id, String tabela) throws ConexaoException, SQLException, ClassNotFoundException {
 		Conexao.initConnection();
 		
-		String sql = "SELECT * FROM COMODO_COMPOSTO WHERE COMODOID = " + id + ");";
+		String sql = "SELECT * FROM COMODO_COMPOSTO WHERE COMODOID = " + id + ";";
 		
 		Statement smt = Conexao.prepare();
 		
@@ -59,7 +60,7 @@ public class ComodoDB {
 		
 		boolean b1 = result.next();
 		
-		sql = "SELECT * FROM COMODO_MOBILIA WHERE COMODOID = " + id + ");";
+		sql = "SELECT * FROM COMODO_MOBILIA WHERE COMODOID = " + id + ";";
 		
 		smt = Conexao.prepare();
 		
@@ -68,7 +69,9 @@ public class ComodoDB {
 		boolean b2 = result.next();
 		
 		if (!b1 && !b2) {
-			sql = "DELETE from COMODO where COMODOID = " + id;
+			sql = "DELETE from " + tabela + " where COMODOID = " + id + ";";
+			
+			System.out.println(sql);
 			
 			smt = Conexao.prepare();
 			
@@ -80,14 +83,26 @@ public class ComodoDB {
 				throw new ConexaoException();
 			}else{
 				Conexao.commit();
+			}
+			
+			sql = "DELETE from COMODO where COMODOID = " + id + ";";
+			
+			smt = Conexao.prepare();
+			
+			linhasAfetadas = smt.executeUpdate(sql);
+		
+			if (linhasAfetadas == 0) {
+				Conexao.rollBack();
 				Conexao.closeConnection();
+				throw new ConexaoException();
+			}else{
+				Conexao.commit();
 			}
 		}
            
 		Conexao.closeConnection();
 		
 		return !b1 && !b2;
-		
 	}
 	
 	public final void atualizar(long id, Comodo comodo) throws ConexaoException, SQLException, ClassNotFoundException {
@@ -111,76 +126,35 @@ public class ComodoDB {
 		}
 	}
 	
-	public static Collection<Comodo> listarTodos(Collection<Long> ids) throws SQLException, ClassNotFoundException {
+	public static Collection<Comodo> listarTodos() throws SQLException, ClassNotFoundException {
 		ArrayList<Comodo> list = new ArrayList<Comodo>();
-		list.addAll(SalaDB.listarTodos(ids));
-		list.addAll(QuartoDB.listarTodos(ids));
-		list.addAll(CozinhaDB.listarTodos(ids));
-		list.addAll(ComodoCompostoDB.listarTodos(ids));
+		list.addAll(SalaDB.listarTodos());
+		list.addAll(QuartoDB.listarTodos());
+		list.addAll(CozinhaDB.listarTodos());
+		list.addAll(ComodoCompostoDB.listarTodos());
 		return list;
 	}
 	
-	public final static Comodo buscar(long id) throws ConexaoException, SQLException, ClassNotFoundException {
+	public final static Comodo buscar(long id) throws SQLException, ClassNotFoundException {
+		
 		Comodo comodo = null;
 		
-		Class.forName("org.h2.Driver");
-		Conexao.initConnection();
+		comodo = SalaDB.buscar(id);
 		
-		String sql = "SELECT * FROM COMODO C JOIN SALA S where C.COMODOID = S.COMODOID and C.COMODOID = " + id + ";";
+		if (comodo != null)
+			return comodo;
 		
-		Statement psmt = Conexao.prepare();
-		ResultSet result = psmt.executeQuery(sql);
+		comodo = QuartoDB.buscar(id);
 		
-		if(result.next()) {
-			String descricao = result.getString("DESCRICAO");
-			try {
-				comodo = new Sala(descricao, Constants.SALA);
-				Conexao.closeConnection();
-				return comodo;
-			} catch (CampoVazioException e) {}
-		}
+		if (comodo != null)
+			return comodo;
 		
-		sql = "SELECT * FROM COMODO C JOIN QUARTO Q where C.COMODOID = Q.COMODOID and C.COMODOID = " + id + ";";
+		comodo = CozinhaDB.buscar(id);	
 		
-		psmt = Conexao.prepare();
-		result = psmt.executeQuery(sql);
+		if (comodo != null)
+			return comodo;
 		
-		if(result.next()) {
-			String descricao = result.getString("DESCRICAO");
-			try {
-				comodo = new Quarto(descricao, Constants.SALA);
-				Conexao.closeConnection();
-				return comodo;
-			} catch (CampoVazioException e) {}
-		}
-		
-		sql = "SELECT * FROM COMODO C JOIN COZINHA CO where C.COMODOID = CO.COMODOID and C.COMODOID = " + id + ";";
-		
-		psmt = Conexao.prepare();
-		result = psmt.executeQuery(sql);
-		
-		if(result.next()) {
-			String descricao = result.getString("DESCRICAO");
-			try {
-				comodo = new Cozinha(descricao, Constants.SALA);
-				Conexao.closeConnection();
-				return comodo;
-			} catch (CampoVazioException e) {}
-		}
-		
-		sql = "SELECT DISTINCT C.COMODOID, C.DESCRICAO FROM COMODO C JOIN COMODO_COMPOSTO CC where C.COMODOID = CC.COMODOID and CC.COMODOID = " + id + ";";
-		
-		psmt = Conexao.prepare();
-		result = psmt.executeQuery(sql);
-		
-		if(result.next()) {
-			String descricao = result.getString("DESCRICAO");
-			try {
-				comodo = new ComodoComposto(descricao, Constants.COMPOSTO);
-				Conexao.closeConnection();
-				return comodo;
-			} catch (CampoVazioException e) {}
-		}
+		comodo = ComodoCompostoDB.buscar(id);	
 		
 		return comodo;
 	}

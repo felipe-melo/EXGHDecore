@@ -8,6 +8,7 @@ import java.util.Collection;
 
 import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.Cozinha;
+import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.entidades.Sala;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
@@ -16,7 +17,7 @@ import im.compIII.exghdecore.util.Constants;
 
 public class CozinhaDB {
 
-	public static Collection<Comodo> listarTodos(Collection<Long> ids) throws SQLException, ClassNotFoundException {
+	public static Collection<Comodo> listarTodos() throws SQLException, ClassNotFoundException {
 		Conexao.initConnection();
 		
 		String sql = "SELECT * FROM COMODO C JOIN COZINHA CO where C.COMODOID = CO.COMODOID;";
@@ -29,12 +30,11 @@ public class CozinhaDB {
 		
 		while(result.next()) {
 			
-			ids.add(result.getLong("COMODOID"));
 			String descricao = result.getString("DESCRICAO");
 			
 			Comodo comodo;
 			try {
-				comodo = new Sala(descricao, Constants.COZINHA);
+				comodo = new Cozinha(result.getLong("COMODOID"), descricao, Constants.COZINHA);
 			} catch (CampoVazioException e) {
 				e.printStackTrace();
 				continue;
@@ -72,28 +72,42 @@ public class CozinhaDB {
 		}
 	}
 	
+	public final static Comodo buscar(long id) throws SQLException, ClassNotFoundException {
+		Comodo comodo = null;
+		
+		Class.forName("org.h2.Driver");
+		Conexao.initConnection();
+		
+		Collection<Mobilia> mobilias = new ArrayList<Mobilia>();
+		
+		String sql = "SELECT * FROM COMODO C JOIN COZINHA CO JOIN COMODO_MOBILIA CM where C.COMODOID = CO.COMODOID and C.COMODOID = " + id + ""
+				+ " AND CM.COMODOID = C.COMODOID;";
+		
+		Statement psmt = Conexao.prepare();
+		ResultSet result = psmt.executeQuery(sql);
+		
+		while(result.next()) {
+			String descricao = result.getString("DESCRICAO");
+			
+			try {
+				if (comodo == null)
+					comodo = new Cozinha(id, descricao, Constants.SALA);
+				Mobilia mobilia = MobiliaDB.buscar(result.getLong("MOBILIAID"), new ArrayList<Long>());
+				mobilias.add(mobilia);
+			} catch (CampoVazioException | ConexaoException e) {}
+		}
+		if (comodo != null) {
+			comodo.setMobilias(mobilias);
+		}
+		Conexao.closeConnection();
+		return comodo;
+	}
+	
 	public void remover(long id) throws ConexaoException, SQLException, ClassNotFoundException, NoRemoveException {
 		
 		ComodoDB db = new ComodoDB();
 		
-		if (db.remover(id)) {
-			Conexao.initConnection();
-			
-			String sql = "DELETE from COZINHA where COMODOID = " + id;
-			
-			Statement psmt = Conexao.prepare();
-			
-			int linhasAfetadas = psmt.executeUpdate(sql);
-		
-			if (linhasAfetadas == 0) {
-				Conexao.rollBack();
-				Conexao.closeConnection();
-				throw new ConexaoException();
-			}else{
-				Conexao.commit();
-				Conexao.closeConnection();
-			}
-		}else{
+		if (!db.remover(id, "COZINHA")) {
 			throw new NoRemoveException();
 		}
 	}

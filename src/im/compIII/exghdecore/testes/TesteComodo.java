@@ -1,4 +1,4 @@
-package im.compIII.exghdecore.testes.unitarios;
+package im.compIII.exghdecore.testes;
 
 import org.junit.Test;
 
