@@ -1,8 +1,12 @@
 package im.compIII.exghdecore.entidades;
 
+import java.sql.SQLException;
 import java.util.Collection;
 
+import im.compIII.exghdecore.banco.ContratoDB;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
+import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.RelacaoException;
 
 public class Contrato {
 	
@@ -37,6 +41,11 @@ public class Contrato {
 	
 	public void setAmbientes(Collection<Ambiente> ambientes) {
 		this.ambientes = ambientes;
+	}
+	
+	public void adicionar() throws NumberFormatException, ClassNotFoundException, ConexaoException, SQLException, RelacaoException {
+		ContratoDB db = new ContratoDB();
+		db.salvar(this);
 	}
 	
 	public float valorContrato() {

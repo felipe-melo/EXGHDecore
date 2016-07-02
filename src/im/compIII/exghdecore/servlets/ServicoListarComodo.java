@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import im.compIII.exghdecore.banco.ComodoDB;
 import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.util.Constants;
 
@@ -71,7 +70,7 @@ public class ServicoListarComodo extends HttpServlet {
 		Collection<Comodo> comodos;
 		Collection<Long> ids= new ArrayList<Long>();
 		try {
-			comodos = ComodoDB.listarTodos();
+			comodos = Comodo.buscarTodos();
 		} catch (SQLException e) {
 			comodos = new ArrayList<Comodo>();
 			e.printStackTrace();

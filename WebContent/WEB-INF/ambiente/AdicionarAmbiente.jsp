@@ -12,8 +12,9 @@
 		<title>Ambiente</title>
 	</head>
 	<body>
-		<form name="ambiente" action="ServicoCriarAmbiente" method="post">
-			Comissão:<input type="text" name="comissao" /><br>
+		<form name="ambiente" action="ServicoAdicionarAmbiente" method="post">
+			<%long contratoId = (Long)request.getAttribute("contratoId");%>
+			<input type="hidden" name="contratoId" value="<%=contratoId%>"/>
 			Número de Paredes:<input type="text" name="numParedes" /><br>
 			Número de Portas:<input type="text" name="numPortas" /><br>
 			Metragem:<input type="text" name="metragem" /><br><br>
@@ -21,11 +22,11 @@
 				<option value="">comodo</option>
 				<% Collection<Comodo> comodos = (Collection<Comodo>) request.getAttribute("comodos");
 				for (Comodo comodo: comodos) {
-					long id = comodo.getId();%>
+					long id = comodo.getId(); %>
 					<option value="<%=id%>"><%=comodo.getDescricao()%></option>
 				<%
 				}%>
-			</select><input type="submit" name="acaoCriar" value="listar mobilias" /><br>
+			</select><input type="submit" name="acaoAdicionar" value="listar mobilias" /><br>
 			
 			<% Collection<Mobilia> mobilias = (Collection<Mobilia>) request.getAttribute("mobilias");
 				int i = 0;
@@ -38,7 +39,7 @@
 				}
 			%>
 			<br>
-			<input type="submit" name="acaoCriar" value="criar" />
+			<input type="submit" name="acaoAdicionar" value="add" />
 		</form>
 		<br>
 		<%@include file="../messagePage.jsp" %>

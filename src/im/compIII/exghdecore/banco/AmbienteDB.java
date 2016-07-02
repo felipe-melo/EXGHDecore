@@ -10,8 +10,10 @@ import java.util.Collection;
 import im.compIII.exghdecore.entidades.Ambiente;
 import im.compIII.exghdecore.entidades.Contrato;
 import im.compIII.exghdecore.entidades.ItemVenda;
+import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.NoRemoveException;
 import im.compIII.exghdecore.exceptions.RelacaoException;
 
 public class AmbienteDB {
@@ -33,11 +35,12 @@ public class AmbienteDB {
 			int numParedes = result.getInt("NUMERO_PAREDES");
 			float metragem = result.getFloat("METRAGEM");
 			float comissao = result.getFloat("COMISSAO");
+			long contratoId = result.getLong("CONTRATOID");
 			
 			Ambiente ambiente;
 			try {
 				ambiente = new Ambiente(ambienteId, numParedes, numPortas, metragem);
-				Contrato contrato = new Contrato(comissao);
+				Contrato contrato = new Contrato(contratoId, comissao);
 				ambiente.setContrato(contrato);
 			} catch (CampoVazioException e) {
 				e.printStackTrace();
@@ -83,15 +86,14 @@ public class AmbienteDB {
 	
 	public final long salvar(Ambiente ambiente, String[] mobiliasId, int[] quantidades) throws ConexaoException, SQLException, ClassNotFoundException, NumberFormatException, CampoVazioException,
 	RelacaoException {
-		Conexao.initConnection();
 		
-		long id;
+		ContratoDB contratodb = new ContratoDB();
 		
-		ContratoDB db = new ContratoDB();
-		
-		id = db.salvar(ambiente.getContrato());
+		long id = contratodb.salvar(ambiente.getContrato());
 		
 		//Ambiente
+		
+		Conexao.initConnection();
 		
 		String sql = "INSERT INTO AMBIENTE (CONTRATOID, NUMERO_PAREDES, NUMERO_PORTAS, METRAGEM) VALUES(?, ?, ?, ?);";
 		
@@ -113,6 +115,7 @@ public class AmbienteDB {
 		if (generatedKeys.next()) {
             id = generatedKeys.getLong(1);
             Conexao.commit();
+            Conexao.closeConnection();
         } else {
         	Conexao.rollBack();
         	Conexao.closeConnection();
@@ -121,29 +124,64 @@ public class AmbienteDB {
 		
 		if (mobiliasId != null && mobiliasId.length > 0) {
 			for (int i = 0; i < mobiliasId.length; i++) {
-				sql = "INSERT INTO ITEM_VENDA (QUANTIDADE, MOBILIAID, AMBIENTEID) VALUES(?, ?, ?);";
 				
-				psmt = Conexao.prepare(sql);
+				ItemVendaDB db = new ItemVendaDB();
 				
-				psmt.setInt(1, quantidades[i]);
-				psmt.setLong(2, Long.valueOf(mobiliasId[i]));
-				psmt.setLong(3, id);
+				Mobilia mobilia = MobiliaDB.buscar(Long.valueOf(mobiliasId[i]));
 				
-				linhasAfetadas = psmt.executeUpdate();
+				ItemVenda itemVenda = new ItemVenda(quantidades[i], mobilia);
 				
-				if (linhasAfetadas == 0) {
-					throw new ConexaoException();
-				}
+				db.salvar(itemVenda, id);
+			}
+		}
+		
+		return id;
+	}
+	
+	public final long salvarNovo(Ambiente ambiente, long contratoId, String[] mobiliasId, int[] quantidades) throws ConexaoException, SQLException, ClassNotFoundException, NumberFormatException, CampoVazioException,
+	RelacaoException {
+		
+		Conexao.initConnection();
+		
+		String sql = "INSERT INTO AMBIENTE (CONTRATOID, NUMERO_PAREDES, NUMERO_PORTAS, METRAGEM) VALUES(?, ?, ?, ?);";
+		
+		PreparedStatement psmt = Conexao.prepare(sql);
+		
+		psmt.setLong(1, contratoId);
+		psmt.setInt(2, ambiente.getNumParedes());
+		psmt.setInt(3, ambiente.getNumPortas());
+		psmt.setFloat(4, ambiente.getMetragem());
+		
+		int linhasAfetadas = psmt.executeUpdate();
+		
+		if (linhasAfetadas == 0) {
+			throw new ConexaoException();
+		}
+		
+		ResultSet generatedKeys = psmt.getGeneratedKeys();
+		
+		long id;
+        
+		if (generatedKeys.next()) {
+            id = generatedKeys.getLong(1);
+            Conexao.commit();
+            Conexao.closeConnection();
+        } else {
+        	Conexao.rollBack();
+        	Conexao.closeConnection();
+            throw new SQLException();
+        }
+		
+		if (mobiliasId != null && mobiliasId.length > 0) {
+			for (int i = 0; i < mobiliasId.length; i++) {
 				
-				generatedKeys = psmt.getGeneratedKeys();
-		        
-				if (generatedKeys.next()) {
-		            Conexao.commit();
-		        } else {
-		        	Conexao.rollBack();
-		        	Conexao.closeConnection();
-		            throw new SQLException();
-		        }
+				ItemVendaDB db = new ItemVendaDB();
+				
+				Mobilia mobilia = MobiliaDB.buscar(Long.valueOf(mobiliasId[i]));
+				
+				ItemVenda itemVenda = new ItemVenda(quantidades[i], mobilia);
+				
+				db.salvar(itemVenda, id);
 			}
 		}
 		
@@ -225,6 +263,44 @@ public class AmbienteDB {
 			e.printStackTrace();
 		} catch (RelacaoException e) {
 			e.printStackTrace();
+		}
+		
+		if (mobiliasIds != null && mobiliasIds.length > 0) {
+			for (int i = 0; i < mobiliasIds.length; i++) {
+				
+				ItemVendaDB itemVDB = new ItemVendaDB();
+				
+				Mobilia mobilia = MobiliaDB.buscar(Long.valueOf(mobiliasIds[i]));
+				
+				ItemVenda itemVenda;
+				try {
+					itemVenda = new ItemVenda(quantidades[i], mobilia);
+					itemVDB.salvar(itemVenda, ambiente.getId());
+				} catch (CampoVazioException e) {
+					e.printStackTrace();
+				} catch (NumberFormatException | RelacaoException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+	}
+	
+	public final static void remover(long id) throws ClassNotFoundException, SQLException, ConexaoException, NoRemoveException {
+		
+		Conexao.initConnection();
+		
+		String sql = "DELETE from AMBIENTE where AMBIENTEID = " + id + ";";
+		
+		Statement smt = Conexao.prepare();
+		
+		int linhasAfetadas = smt.executeUpdate(sql);
+	
+		if (linhasAfetadas == 0) {
+			Conexao.rollBack();
+			Conexao.closeConnection();
+			throw new NoRemoveException();
+		}else{
+			Conexao.commit();
 		}
 	}
 }

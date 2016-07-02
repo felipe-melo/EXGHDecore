@@ -15,9 +15,11 @@ import im.compIII.exghdecore.util.Constants;
 
 public class ComodoCompostoDB {
 	
-	public void salvar(ComodoComposto comodoComposto, String[] comodosId) throws ConexaoException, SQLException, ClassNotFoundException, RelacaoException {
+	public void salvar(ComodoComposto comodoComposto) throws ConexaoException, SQLException, ClassNotFoundException, RelacaoException {
 		
-		if (comodosId != null && comodosId.length > 0) {
+		Collection<Comodo> componentes = comodoComposto.getComodos();
+		
+		if (componentes != null && componentes.size() > 0) {
 		
 			ComodoDB db = new ComodoDB();
 			long id = db.salvar(comodoComposto);
@@ -26,8 +28,8 @@ public class ComodoCompostoDB {
 				
 				Conexao.initConnection();
 				
-				for (String comodo: comodosId) {
-					String sql = "INSERT INTO COMODO_COMPOSTO (COMODOID, COMPONENTEID) VALUES(" + id + ", " + Integer.valueOf(comodo) + ");";
+				for (Comodo comodo: componentes) {
+					String sql = "INSERT INTO COMODO_COMPOSTO (COMODOID, COMPONENTEID) VALUES(" + id + ", " + comodo.getId() + ");";
 					
 					Statement stm = Conexao.prepare();
 					

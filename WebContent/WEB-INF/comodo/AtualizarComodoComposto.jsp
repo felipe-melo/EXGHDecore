@@ -14,12 +14,13 @@
 		<form name="comodo" action="ServicoAtualizarComodoComposto" method="post">
 			<% Comodo comodo = (Comodo) request.getAttribute("comodo");
 			long id = (Long) request.getAttribute("id");%>
-			<hidden name="id" readonly="true" value="<%=id %>" /><br>
+			<input type="hidden" name="id" value="<%=id %>" />
 			Descrição:<input type="text" name="descricao" value="<%=comodo.getDescricao() %>"/><br>
 			<%Collection<Comodo> comodos = (Collection<Comodo>) request.getAttribute("comodos");
+			Collection<Long> componentes = (Collection<Long>) request.getAttribute("componentes");
 			int i = 0;
 			for (Comodo c: comodos) {%>
-				<input type="checkbox" name="checkComodos" readonly="true" value="<%=comodo.getId()%>"><%=c.getDescricao()%><br>
+				<input type="checkbox" name="checkComodos" value="<%=c.getId()%>" <%if(componentes.contains(c.getId())) { %> checked <%} %>><%=c.getDescricao()%><br>
 			<%
 			}%><br>
 			<input type="submit" name="acaoAtualizar" value="atualizar" />

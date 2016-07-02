@@ -11,7 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import im.compIII.exghdecore.banco.ComodoDB;
 import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.ComodoComposto;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
@@ -32,7 +31,6 @@ public class ServicoAtualizarComodoComposto extends HttpServlet {
 			switch (acao) {
 				case "atualizar":
 					atualizar(req, resp);
-					break;
 				case "voltar":
 					req.getRequestDispatcher("ServicoListarComodo").forward(req, resp);
 					break;
@@ -47,16 +45,23 @@ public class ServicoAtualizarComodoComposto extends HttpServlet {
 	private void buscarForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
 		Collection<Comodo> comodos;
-		Collection<Long> ids = new ArrayList<Long>();
 		
 		try {
 			long id = Long.valueOf(req.getParameter("id"));
-			Comodo comodo = ComodoDB.buscar(id);
+			Comodo comodo = ComodoComposto.buscar(id);
 			req.setAttribute("comodo", comodo);
 			req.setAttribute("id", id);
 			
+			Collection<Long> componentes = new ArrayList<Long>();
+			
+			for (Comodo c: ((ComodoComposto)comodo).getComodos()) {
+				componentes.add(c.getId());
+			}
+			
+			req.setAttribute("componentes", componentes);
+			
 			try {
-				comodos = ComodoDB.listarTodos();
+				comodos = Comodo.buscarTodos();
 			} catch (ClassNotFoundException e) {
 				comodos = new ArrayList<Comodo>();
 				e.printStackTrace();
@@ -65,7 +70,6 @@ public class ServicoAtualizarComodoComposto extends HttpServlet {
 				e.printStackTrace();
 			}
 			req.setAttribute("comodos", comodos);
-			req.setAttribute("ids", ids);
 			
 			req.getRequestDispatcher("WEB-INF/comodo/AtualizarComodoComposto.jsp").forward(req, resp);
 		}catch (Exception e) {
@@ -80,9 +84,8 @@ public class ServicoAtualizarComodoComposto extends HttpServlet {
 		long id = Long.valueOf(req.getParameter("id"));
 		String descricao = req.getParameter("descricao");
 		try{
-			Comodo comodo = new ComodoComposto(descricao, Constants.COMPOSTO);
-			ComodoDB db = new ComodoDB();
-			db.atualizar(id, comodo);
+			Comodo comodo = new ComodoComposto(id, descricao, Constants.COMPOSTO);
+			comodo.atualizar();
 			req.setAttribute("message", "Comodo atualizado com sucesso!");
 		}catch(ClassNotFoundException cnfe){
 			req.setAttribute("erro", "Valor invário para o Tipo!");

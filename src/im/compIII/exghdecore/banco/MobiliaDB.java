@@ -7,6 +7,7 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
@@ -14,11 +15,13 @@ import im.compIII.exghdecore.exceptions.RelacaoException;
 
 public class MobiliaDB {
 	
-	public final long salvar(Mobilia mobilia, String... comodosId) 
+	public final long salvar(Mobilia mobilia) 
 			throws ConexaoException, SQLException, ClassNotFoundException, NumberFormatException, CampoVazioException, RelacaoException {
 		Conexao.initConnection();
 		
 		long id;
+		
+		Collection<Comodo> comodos = mobilia.getComodos();
 		
 		String sql = "INSERT INTO mobilia (DESCRICAO, CUSTO, TEMPO_ENTREGA) VALUES(?, ?, ?);";
 		
@@ -43,7 +46,7 @@ public class MobiliaDB {
             throw new SQLException();
         }
 		
-		if (comodosId == null || comodosId.length == 0) {
+		if (comodos == null || comodos.size() == 0) {
 			Conexao.rollBack();
 			Conexao.closeConnection();
 			throw new RelacaoException("Comodo");
@@ -52,8 +55,8 @@ public class MobiliaDB {
 		Conexao.commit();
         Conexao.closeConnection();
 		
-		for(String comodo: comodosId) {
-			ComodoMobilia cm = new ComodoMobilia(Integer.valueOf(comodo), id);
+		for(Comodo comodo: comodos) {
+			ComodoMobilia cm = new ComodoMobilia(comodo.getId(), id);
 			cm.salvar();
 		}
 		return id;
@@ -89,7 +92,7 @@ public class MobiliaDB {
 		return list;
 	}
 	
-	public final static Mobilia buscar(long id, Collection<Long> comodosIds) throws ConexaoException, SQLException, ClassNotFoundException {
+	public final static Mobilia buscar(long id) throws ConexaoException, SQLException, ClassNotFoundException {
 		Mobilia mobilia = null;
 		
 		Conexao.initConnection();
@@ -103,24 +106,28 @@ public class MobiliaDB {
 		double custo = 0;
 		int tempoEntrega = 0;
 		
+		Collection<Comodo> componentes = new ArrayList<Comodo>();
+		
 		while(result.next()) {
 			descricao = result.getString("DESCRICAO");
 			custo = result.getDouble("CUSTO");
 			tempoEntrega = result.getInt("TEMPO_ENTREGA");
-			comodosIds.add(result.getLong("COMODOID"));
+			componentes.add(Comodo.buscarSimples(result.getLong("COMODOID")));
 		}
 		try {
-			if (!descricao.equals(""))
+			if (!descricao.equals("")) {
 				mobilia = new Mobilia(id, descricao, custo, tempoEntrega);
+				mobilia.setComodos(componentes);
+			}
 		} catch (CampoVazioException e) {}
 		Conexao.closeConnection();
 		return mobilia;
 	}
 	
-	public final void atualizar(long id, Mobilia mobilia) throws ConexaoException, SQLException, ClassNotFoundException {
+	public final void atualizar(Mobilia mobilia) throws ConexaoException, SQLException, ClassNotFoundException {
 		Conexao.initConnection();
 		
-		String sql = "UPDATE MOBILIA SET DESCRICAO = ?, CUSTO = ?, TEMPO_ENTREGA = ? WHERE MOBILIAID = " + id + ";";
+		String sql = "UPDATE MOBILIA SET DESCRICAO = ?, CUSTO = ?, TEMPO_ENTREGA = ? WHERE MOBILIAID = " + mobilia.getId() + ";";
 		
 		PreparedStatement psmt = Conexao.prepare(sql);
 		

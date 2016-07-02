@@ -6,6 +6,7 @@ import java.util.Collection;
 import im.compIII.exghdecore.banco.AmbienteDB;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.NoRemoveException;
 import im.compIII.exghdecore.exceptions.RelacaoException;
 
 public class Ambiente {
@@ -56,6 +57,23 @@ public class Ambiente {
 	public void adicionar(String[] mobiliasIds, int[] quantidades) throws NumberFormatException, ClassNotFoundException, ConexaoException, SQLException, CampoVazioException, RelacaoException {
 		AmbienteDB db = new AmbienteDB();
 		db.salvar(this, mobiliasIds, quantidades);
+	}
+	
+	public void adicionarNovo(long contratoId, String[] mobiliasIds, int[] quantidades) throws NumberFormatException, ClassNotFoundException, ConexaoException, SQLException, CampoVazioException, RelacaoException {
+		AmbienteDB db = new AmbienteDB();
+		db.salvarNovo(this, contratoId, mobiliasIds, quantidades);
+	}
+	
+	public static Ambiente buscar(long id) throws ClassNotFoundException, SQLException, ConexaoException {
+		return AmbienteDB.buscar(id);
+	}
+	
+	public static Collection<Ambiente> buscarTodos() throws ClassNotFoundException, SQLException, ConexaoException {
+		return AmbienteDB.listarTodos();
+	}
+	
+	public static void remover(long id) throws ClassNotFoundException, SQLException, ConexaoException, NoRemoveException {
+		AmbienteDB.remover(id);
 	}
 	
 	public void setItensVenda(Collection<ItemVenda> itensVenda) {

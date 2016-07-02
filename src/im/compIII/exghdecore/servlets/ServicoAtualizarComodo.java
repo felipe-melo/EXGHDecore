@@ -9,7 +9,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import im.compIII.exghdecore.banco.ComodoDB;
 import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.Cozinha;
 import im.compIII.exghdecore.entidades.Quarto;
@@ -47,7 +46,7 @@ public class ServicoAtualizarComodo extends HttpServlet {
 		
 		try {
 			long id = Long.valueOf(req.getParameter("id"));
-			Comodo comodo = ComodoDB.buscar(id);
+			Comodo comodo = Comodo.buscar(id);
 			req.setAttribute("comodo", comodo);
 			req.setAttribute("id", id);
 			req.getRequestDispatcher("WEB-INF/comodo/AtualizarComodo.jsp").forward(req, resp);
@@ -66,13 +65,12 @@ public class ServicoAtualizarComodo extends HttpServlet {
 		Comodo comodo = null;
 		try{
 			if (tipo == Constants.SALA)
-				comodo = new Sala(descricao, tipo);
+				comodo = new Sala(id, descricao, tipo);
 			else if (tipo == Constants.QUARTO)
-				comodo = new Quarto(descricao, tipo);
+				comodo = new Quarto(id, descricao, tipo);
 			else if (tipo == Constants.COZINHA)
-				comodo = new Cozinha(descricao, tipo);
-			ComodoDB db = new ComodoDB();
-			db.atualizar(id, comodo);
+				comodo = new Cozinha(id, descricao, tipo);
+			comodo.atualizar();
 			req.setAttribute("message", "Comodo atualizado com sucesso!");
 		}catch(ClassNotFoundException cnfe){
 			req.setAttribute("erro", "Valor invário para o Tipo!");
@@ -81,8 +79,9 @@ public class ServicoAtualizarComodo extends HttpServlet {
 		}catch(SQLException sqlE){
 			sqlE.printStackTrace();
 			req.setAttribute("erro", "Falha no banco dados.");
-		}catch (ConexaoException ce) {
-			req.setAttribute("erro", "Falhar na conexão com o servidor.");
+		} catch (ConexaoException e) {
+			req.setAttribute("erro", "Falha no banco dados.");
+			e.printStackTrace();
 		}
 	}
 }

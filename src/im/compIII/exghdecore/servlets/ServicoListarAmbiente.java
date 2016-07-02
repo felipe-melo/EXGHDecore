@@ -10,8 +10,6 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-
-import im.compIII.exghdecore.banco.AmbienteDB;
 import im.compIII.exghdecore.entidades.Ambiente;
 import im.compIII.exghdecore.exceptions.ConexaoException;
 
@@ -38,6 +36,23 @@ public class ServicoListarAmbiente extends HttpServlet {
 			case "criar":
 				req.getRequestDispatcher("ServicoCriarAmbiente").forward(req, resp);
 				break;
+			case "remover":
+				String id = req.getParameter("id");
+				if (id == null) {
+					req.setAttribute("erro", "Selecione o Ambiente a ser removido.");
+					this.listar(req, resp);
+					break;
+				}
+				req.getRequestDispatcher("ServicoRemoverAmbiente").forward(req, resp);
+				break;
+			case "adicionar":
+				if (req.getParameter("id") != null) {
+					String contratoId = (String)req.getParameter("contrato-" + req.getParameter("id"));
+					req.setAttribute("contratoId", contratoId);
+					req.getRequestDispatcher("ServicoAdicionarAmbiente").forward(req, resp);
+					break;
+				}
+				req.setAttribute("erro", "Selecione um ambiente.");
 			default:
 				this.listar(req, resp);
 		}
@@ -46,7 +61,7 @@ public class ServicoListarAmbiente extends HttpServlet {
 	private void listar(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		Collection<Ambiente> ambientes;
 		try {
-			ambientes = AmbienteDB.listarTodos();
+			ambientes = Ambiente.buscarTodos();
 		} catch (ConexaoException | SQLException e) {
 			ambientes = new ArrayList<Ambiente>();
 			e.printStackTrace();

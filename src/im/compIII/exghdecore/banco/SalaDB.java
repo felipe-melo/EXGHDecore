@@ -84,27 +84,59 @@ public class SalaDB {
 		
 		Collection<Mobilia> mobilias = new ArrayList<Mobilia>();
 		
-		String sql = "SELECT * FROM COMODO C JOIN SALA S JOIN COMODO_MOBILIA CM where C.COMODOID = S.COMODOID and C.COMODOID = " + id + ""
-				+ " AND CM.COMODOID = C.COMODOID;";
+		String sql = "SELECT * FROM COMODO C JOIN SALA S where C.COMODOID = S.COMODOID and C.COMODOID = " + id + "";
 		
 		Statement psmt = Conexao.prepare();
 		ResultSet result = psmt.executeQuery(sql);
 		
-		while(result.next()) {
+		if(result.next()) {
 			String descricao = result.getString("DESCRICAO");
 			
 			try {
-				if (comodo == null)
-					comodo = new Sala(id, descricao, Constants.SALA);
-				Mobilia mobilia = MobiliaDB.buscar(result.getLong("MOBILIAID"), new ArrayList<Long>());
-				mobilias.add(mobilia);
-			} catch (CampoVazioException | ConexaoException e) {
+				comodo = new Sala(id, descricao, Constants.SALA);
+			} catch (CampoVazioException e) {
 				e.printStackTrace();
 			}
 		}
-		if (comodo != null) {
-			comodo.setMobilias(mobilias);
+		if (comodo == null) return comodo;
+		
+		sql = "SELECT * FROM COMODO C JOIN COMODO_MOBILIA CM where C.COMODOID = CM.COMODOID and C.COMODOID = " + id + "";
+		
+		psmt = Conexao.prepare();
+		result = psmt.executeQuery(sql);
+		
+		while(result.next()) {
+			try {
+				Mobilia mobilia = MobiliaDB.buscar(result.getLong("MOBILIAID"));
+				mobilias.add(mobilia);
+			} catch (ConexaoException e) {}
 		}
+		comodo.setMobilias(mobilias);
+		Conexao.closeConnection();
+		return comodo;
+	}
+	
+	public final static Comodo buscarSimples(long id) throws SQLException, ClassNotFoundException {
+		Comodo comodo = null;
+		
+		Class.forName("org.h2.Driver");
+		Conexao.initConnection();
+		
+		String sql = "SELECT * FROM COMODO C JOIN SALA S where C.COMODOID = S.COMODOID and C.COMODOID = " + id + "";
+		
+		Statement psmt = Conexao.prepare();
+		ResultSet result = psmt.executeQuery(sql);
+		
+		if(result.next()) {
+			String descricao = result.getString("DESCRICAO");
+			
+			try {
+				comodo = new Sala(id, descricao, Constants.SALA);
+			} catch (CampoVazioException e) {
+				e.printStackTrace();
+			}
+		}
+		
 		Conexao.closeConnection();
 		return comodo;
 	}

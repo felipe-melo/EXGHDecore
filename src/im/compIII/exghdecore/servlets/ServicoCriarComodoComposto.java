@@ -11,8 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import im.compIII.exghdecore.banco.ComodoCompostoDB;
-import im.compIII.exghdecore.banco.ComodoDB;
 import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.ComodoComposto;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
@@ -46,7 +44,7 @@ public class ServicoCriarComodoComposto extends HttpServlet {
 		Collection<Comodo> comodos;
 		Collection<Long> ids = new ArrayList<Long>();
 		try {
-			comodos = ComodoDB.listarTodos();
+			comodos = Comodo.buscarTodos();
 		} catch (ClassNotFoundException e) {
 			comodos = new ArrayList<Comodo>();
 			e.printStackTrace();
@@ -62,10 +60,16 @@ public class ServicoCriarComodoComposto extends HttpServlet {
 	private void criar(HttpServletRequest req, HttpServletResponse resp) {
 		String descricao = req.getParameter("descricao");
 		String[] ids = req.getParameterValues("checkComodos");
+		Collection<Comodo> componentes = new ArrayList<Comodo>();
 		try{
+			
+			for (String id: ids) {
+				componentes.add(Comodo.buscar(Long.valueOf(id)));
+			}
+			
 			ComodoComposto comodo = new ComodoComposto(descricao, Constants.COMPOSTO);
-			ComodoCompostoDB db = new ComodoCompostoDB();
-			db.salvar(comodo, ids);
+			comodo.setComodos(componentes);
+			comodo.adicionar();
 			req.setAttribute("message", "Comodo criado com sucesso!");
 		}catch(SQLException | ClassNotFoundException ex){
 			ex.printStackTrace();
@@ -76,8 +80,8 @@ public class ServicoCriarComodoComposto extends HttpServlet {
 		}catch (CampoVazioException e) {
 			e.printStackTrace();
 			req.setAttribute("erro", "Campo " + e.getMessage() + " é obrigatório.");
-		} catch (RelacaoException e) {
-			req.setAttribute("erro", "seleciona pelo menos um " + e.getMessage() + ".");
+		} catch (NullPointerException | RelacaoException e) {
+			req.setAttribute("erro", "seleciona pelo menos um comodo.");
 			e.printStackTrace();
 		}
 	}

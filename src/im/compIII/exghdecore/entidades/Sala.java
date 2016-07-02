@@ -5,7 +5,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import im.compIII.exghdecore.banco.ComodoDB;
+import im.compIII.exghdecore.banco.SalaDB;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
+import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.NoRemoveException;
 
 public class Sala extends Comodo {
 
@@ -29,5 +32,16 @@ public class Sala extends Comodo {
 			return (ArrayList<Mobilia>) c.getMobilias();
 		else
 			return new ArrayList<Mobilia>();
+	}
+
+	@Override
+	public void adicionar() throws ClassNotFoundException, ConexaoException, SQLException {
+		SalaDB db = new SalaDB();
+		db.salvar(this);
+	}
+	
+	public static void remover(long id) throws ClassNotFoundException, ConexaoException, SQLException, NoRemoveException {
+		SalaDB db = new SalaDB();
+		db.remover(id);
 	}
 }

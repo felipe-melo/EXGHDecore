@@ -9,15 +9,13 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import im.compIII.exghdecore.banco.CozinhaDB;
-import im.compIII.exghdecore.banco.QuartoDB;
-import im.compIII.exghdecore.banco.SalaDB;
 import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.Cozinha;
 import im.compIII.exghdecore.entidades.Quarto;
 import im.compIII.exghdecore.entidades.Sala;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.RelacaoException;
 import im.compIII.exghdecore.util.Constants;
 
 @WebServlet("/ServicoCriarComodo")
@@ -55,17 +53,12 @@ public class ServicoCriarComodo extends HttpServlet {
 			
 			if (tipo == Constants.SALA) {
 				comodo = new Sala(descricao, tipo);
-				SalaDB db = new SalaDB();
-				db.salvar(comodo);
 			} else if (tipo == Constants.QUARTO) {
 				comodo = new Quarto(descricao, tipo);
-				QuartoDB db = new QuartoDB();
-				db.salvar(comodo);
 			} else if (tipo == Constants.COZINHA) {
 				comodo = new Cozinha(descricao, tipo);
-				CozinhaDB db = new CozinhaDB();
-				db.salvar(comodo);
 			}
+			comodo.adicionar();
 			req.setAttribute("message", "Comodo criado com sucesso!");
 		}catch(ClassNotFoundException | NumberFormatException cnfe){
 			req.setAttribute("erro", "Valor invário para o Tipo!");
@@ -77,6 +70,9 @@ public class ServicoCriarComodo extends HttpServlet {
 		}catch (ConexaoException ce) {
 			ce.printStackTrace();
 			req.setAttribute("erro", "Falhar na conexão com o servidor.");
+		} catch (RelacaoException e) {
+			req.setAttribute("erro", "Adicione pelo menos um comodo.");
+			e.printStackTrace();
 		}
 	}
 }

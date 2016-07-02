@@ -8,14 +8,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import im.compIII.exghdecore.entidades.Comodo;
-import im.compIII.exghdecore.entidades.ComodoComposto;
-import im.compIII.exghdecore.entidades.Cozinha;
-import im.compIII.exghdecore.entidades.Mobilia;
-import im.compIII.exghdecore.entidades.Quarto;
-import im.compIII.exghdecore.entidades.Sala;
-import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
-import im.compIII.exghdecore.util.Constants;
 
 public class ComodoDB {
 	
@@ -71,8 +64,6 @@ public class ComodoDB {
 		if (!b1 && !b2) {
 			sql = "DELETE from " + tabela + " where COMODOID = " + id + ";";
 			
-			System.out.println(sql);
-			
 			smt = Conexao.prepare();
 			
 			int linhasAfetadas = smt.executeUpdate(sql);
@@ -105,10 +96,10 @@ public class ComodoDB {
 		return !b1 && !b2;
 	}
 	
-	public final void atualizar(long id, Comodo comodo) throws ConexaoException, SQLException, ClassNotFoundException {
+	public final void atualizar(Comodo comodo) throws ConexaoException, SQLException, ClassNotFoundException {
 		Conexao.initConnection();
 		
-		String sql = "UPDATE COMODO SET DESCRICAO = ? WHERE COMODOID = " + id + ";";
+		String sql = "UPDATE COMODO SET DESCRICAO = ? WHERE COMODOID = " + comodo.getId() + ";";
 		
 		PreparedStatement psmt = Conexao.prepare(sql);
 		
@@ -155,6 +146,28 @@ public class ComodoDB {
 			return comodo;
 		
 		comodo = ComodoCompostoDB.buscar(id);	
+		
+		return comodo;
+	}
+	
+	public final static Comodo buscarSimples(long id) throws SQLException, ClassNotFoundException {
+		
+		Comodo comodo = null;
+		
+		comodo = SalaDB.buscarSimples(id);
+		
+		if (comodo != null)
+			return comodo;
+		
+		comodo = QuartoDB.buscarSimples(id);
+		
+		if (comodo != null)
+			return comodo;
+		
+		comodo = CozinhaDB.buscarSimples(id);	
+		
+		if (comodo != null)
+			return comodo;
 		
 		return comodo;
 	}

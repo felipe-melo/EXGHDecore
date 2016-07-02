@@ -11,8 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import im.compIII.exghdecore.banco.ComodoDB;
-import im.compIII.exghdecore.banco.MobiliaDB;
 import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
@@ -47,7 +45,7 @@ public class ServicoCriarMobilia extends HttpServlet {
 		Collection<Long> ids = new ArrayList<Long>();
 		
 		try {
-			comodos = ComodoDB.listarTodos();
+			comodos = Comodo.buscarTodos();
 		} catch (ClassNotFoundException e) {
 			comodos = new ArrayList<Comodo>();
 			e.printStackTrace();
@@ -69,10 +67,15 @@ public class ServicoCriarMobilia extends HttpServlet {
 			double custo = Double.valueOf(req.getParameter("custo"));
 			int tempoEntrega = Integer.valueOf(req.getParameter("tempoEntrega"));
 			String[] comodosId = req.getParameterValues("checkComodos");
+			Collection<Comodo> comodos = new ArrayList<Comodo>();
+			
+			for (String id: comodosId) {
+				comodos.add(Comodo.buscar(Long.valueOf(id)));
+			}
 			
 			Mobilia mobilia = new Mobilia(descricao, custo, tempoEntrega);
-			MobiliaDB db = new MobiliaDB();
-			db.salvar(mobilia, comodosId);
+			mobilia.setComodos(comodos);
+			mobilia.adicionar();
 			req.setAttribute("message", "Mobilia criada com sucesso!");
 		}catch(NumberFormatException cnfe){
 			req.setAttribute("erro", "Valores inválidos de entrada!");

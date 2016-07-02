@@ -15,7 +15,7 @@ import im.compIII.exghdecore.exceptions.RelacaoException;
 
 public class ItemVendaDB {
 	
-	public final void salvar(ItemVenda itemVenda, long mobiliaId, long ambienteId) throws ConexaoException, SQLException, ClassNotFoundException, NumberFormatException, CampoVazioException,
+	public final void salvar(ItemVenda itemVenda, long ambienteId) throws ConexaoException, SQLException, ClassNotFoundException, NumberFormatException, CampoVazioException,
 		RelacaoException {
 		Conexao.initConnection();
 		
@@ -24,7 +24,7 @@ public class ItemVendaDB {
 		PreparedStatement psmt = Conexao.prepare(sql);
 		
 		psmt.setInt(1, itemVenda.getQuantidade());
-		psmt.setLong(2, mobiliaId);
+		psmt.setLong(2, itemVenda.getMobilia().getId());
 		psmt.setLong(3, ambienteId);
 		
 		int linhasAfetadas = psmt.executeUpdate();
@@ -60,7 +60,7 @@ public class ItemVendaDB {
 		while (result.next()) {
 			int quantidade = result.getInt("QUANTIDADE");
 			long mobiliaId = result.getLong("MOBILIAID");
-			Mobilia mobilia = MobiliaDB.buscar(mobiliaId, new ArrayList<Long>());
+			Mobilia mobilia = MobiliaDB.buscar(mobiliaId);
 			ItemVenda itemVenda = new ItemVenda(quantidade, mobilia);
 			itensVenda.add(itemVenda);
 		}

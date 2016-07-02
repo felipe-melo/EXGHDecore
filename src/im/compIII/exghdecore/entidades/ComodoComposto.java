@@ -1,10 +1,14 @@
 package im.compIII.exghdecore.entidades;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import im.compIII.exghdecore.banco.ComodoCompostoDB;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
+import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.RelacaoException;
 
 public class ComodoComposto extends Comodo {
 	
@@ -35,5 +39,11 @@ public class ComodoComposto extends Comodo {
 			}
 		}
 		return mobilias;
+	}
+	
+	@Override
+	public void adicionar() throws ClassNotFoundException, ConexaoException, SQLException, RelacaoException {
+		ComodoCompostoDB db = new ComodoCompostoDB();
+		db.salvar(this);
 	}
 }

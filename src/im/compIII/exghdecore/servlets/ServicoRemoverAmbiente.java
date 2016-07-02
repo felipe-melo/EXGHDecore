@@ -9,15 +9,12 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import im.compIII.exghdecore.entidades.Cozinha;
-import im.compIII.exghdecore.entidades.Quarto;
-import im.compIII.exghdecore.entidades.Sala;
+import im.compIII.exghdecore.entidades.Ambiente;
 import im.compIII.exghdecore.exceptions.ConexaoException;
 import im.compIII.exghdecore.exceptions.NoRemoveException;
-import im.compIII.exghdecore.util.Constants;
 
-@WebServlet("/ServicoRemoverComodo")
-public class ServicoRemoverComodo extends HttpServlet {
+@WebServlet("/ServicoRemoverAmbiente")
+public class ServicoRemoverAmbiente extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 
@@ -33,7 +30,7 @@ public class ServicoRemoverComodo extends HttpServlet {
 			case "remover":
 				remover(req, resp);
 			default:
-				req.getRequestDispatcher("ServicoListarComodo").forward(req, resp);
+				req.getRequestDispatcher("ServicoListarAmbiente").forward(req, resp);
 		}
 	}
 	
@@ -41,27 +38,21 @@ public class ServicoRemoverComodo extends HttpServlet {
 		
 		try{
 			long id = Long.valueOf(req.getParameter("id"));
-			int tipo = Integer.valueOf(req.getParameter("tipo-" + id));
 			
-			if (tipo == Constants.SALA) {
-				Sala.remover(id);
-			} else if (tipo == Constants.QUARTO) {
-				Quarto.remover(id);
-			} else if (tipo == Constants.COZINHA) {
-				Cozinha.remover(id);
-			}
-			req.setAttribute("message", "Comodo removido com sucesso!");
-		}catch(ClassNotFoundException | NumberFormatException cnfe){
+			Ambiente.remover(id);
+			
+			req.setAttribute("message", "Ambiente removido com sucesso!");
+		}catch(NumberFormatException cnfe){
 			req.setAttribute("erro", "Valor invário para o Tipo!");
 		}catch(SQLException sqlE){
 			sqlE.printStackTrace();
 			req.setAttribute("erro", "Falha no banco dados.");
-		}catch (ConexaoException ce) {
+		}catch (ClassNotFoundException | ConexaoException ce) {
 			ce.printStackTrace();
 			req.setAttribute("erro", "Falhar na conexão com o servidor.");
 		}catch (NoRemoveException ce) {
 			ce.printStackTrace();
-			req.setAttribute("erro", "Este comodo possiu associações não foi possível remover.");
+			req.setAttribute("erro", "Este ambiente possiu associações, não foi possível remover.");
 		}finally{
 			req.setAttribute("acaoListar", "");
 		}

@@ -9,7 +9,6 @@ import java.util.Collection;
 import im.compIII.exghdecore.entidades.Comodo;
 import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.entidades.Quarto;
-import im.compIII.exghdecore.entidades.Sala;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
 import im.compIII.exghdecore.exceptions.NoRemoveException;
@@ -79,25 +78,58 @@ public class QuartoDB {
 		
 		Collection<Mobilia> mobilias = new ArrayList<Mobilia>();
 		
-		String sql = "SELECT * FROM COMODO C JOIN QUARTO Q JOIN COMODO_MOBILIA CM where C.COMODOID = Q.COMODOID and C.COMODOID = " + id + ""
-				+ " AND CM.COMODOID = C.COMODOID;";
+		String sql = "SELECT * FROM COMODO C JOIN QUARTO Q where C.COMODOID = Q.COMODOID and C.COMODOID = " + id + ";";
 		
 		Statement psmt = Conexao.prepare();
 		ResultSet result = psmt.executeQuery(sql);
 		
-		while(result.next()) {
+		if(result.next()) {
 			String descricao = result.getString("DESCRICAO");
 			
 			try {
-				if (comodo == null)
-					comodo = new Quarto(id, descricao, Constants.SALA);
-				Mobilia mobilia = MobiliaDB.buscar(result.getLong("MOBILIAID"), new ArrayList<Long>());
+				comodo = new Quarto(id, descricao, Constants.QUARTO);
+				
+			} catch (CampoVazioException e) {}
+		}
+		if (comodo == null) return comodo;
+		
+		sql = "SELECT * FROM COMODO C JOIN COMODO_MOBILIA CM where C.COMODOID = CM.COMODOID and C.COMODOID = " + id + "";
+		
+		psmt = Conexao.prepare();
+		result = psmt.executeQuery(sql);
+		
+		while(result.next()) {
+			try {
+				Mobilia mobilia = MobiliaDB.buscar(result.getLong("MOBILIAID"));
 				mobilias.add(mobilia);
-			} catch (CampoVazioException | ConexaoException e) {}
+			} catch (ConexaoException e) {}
 		}
-		if (comodo != null) {
-			comodo.setMobilias(mobilias);
+		comodo.setMobilias(mobilias);
+		Conexao.closeConnection();
+		return comodo;
+	}
+	
+	public final static Comodo buscarSimples(long id) throws SQLException, ClassNotFoundException {
+		Comodo comodo = null;
+		
+		Class.forName("org.h2.Driver");
+		Conexao.initConnection();
+		
+		String sql = "SELECT * FROM COMODO C JOIN QUARTO Q where C.COMODOID = Q.COMODOID and C.COMODOID = " + id + "";
+		
+		Statement psmt = Conexao.prepare();
+		ResultSet result = psmt.executeQuery(sql);
+		
+		if(result.next()) {
+			String descricao = result.getString("DESCRICAO");
+			
+			try {
+				comodo = new Quarto(id, descricao, Constants.QUARTO);
+			} catch (CampoVazioException e) {
+				e.printStackTrace();
+			}
 		}
+		
 		Conexao.closeConnection();
 		return comodo;
 	}

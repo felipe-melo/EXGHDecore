@@ -6,6 +6,8 @@ import java.util.List;
 
 import im.compIII.exghdecore.banco.ComodoDB;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
+import im.compIII.exghdecore.exceptions.ConexaoException;
+import im.compIII.exghdecore.exceptions.RelacaoException;
 
 public abstract class Comodo {
 	
@@ -44,6 +46,8 @@ public abstract class Comodo {
 	
 	abstract public List<Mobilia> listaMobiliaDisponivel();
 	
+	abstract public void adicionar() throws ClassNotFoundException, ConexaoException, SQLException, RelacaoException;
+	
 	public String getDescricao() {
 		return descricao;
 	}
@@ -56,8 +60,17 @@ public abstract class Comodo {
 		return id;
 	}
 	
+	public void atualizar() throws ClassNotFoundException, SQLException, ConexaoException {
+		ComodoDB db = new ComodoDB();
+		db.atualizar(this);
+	}
+	
 	public static Comodo buscar(long id) throws ClassNotFoundException, SQLException {
 		return ComodoDB.buscar(id);
+	}
+	
+	public static Comodo buscarSimples(long id) throws ClassNotFoundException, SQLException {
+		return ComodoDB.buscarSimples(id);
 	}
 	
 	public static Collection<Comodo> buscarTodos() throws ClassNotFoundException, SQLException {

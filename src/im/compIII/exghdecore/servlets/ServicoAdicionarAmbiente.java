@@ -13,28 +13,27 @@ import javax.servlet.http.HttpServletResponse;
 
 import im.compIII.exghdecore.entidades.Ambiente;
 import im.compIII.exghdecore.entidades.Comodo;
-import im.compIII.exghdecore.entidades.Contrato;
 import im.compIII.exghdecore.entidades.Mobilia;
 import im.compIII.exghdecore.exceptions.CampoVazioException;
 import im.compIII.exghdecore.exceptions.ConexaoException;
 import im.compIII.exghdecore.exceptions.RelacaoException;
 
-@WebServlet("/ServicoCriarAmbiente")
-public class ServicoCriarAmbiente extends HttpServlet {
+@WebServlet("/ServicoAdicionarAmbiente")
+public class ServicoAdicionarAmbiente extends HttpServlet {
 	
 	private static final long serialVersionUID = 1L;
 
 	@Override
 	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		String acao = (String) req.getParameter("acaoCriar");
+		String acao = (String) req.getParameter("acaoAdicionar");
 
 		if (acao != null) {
 			switch (acao) {
 				case "listar mobilias":
 					listarMobilias(req, resp);
 				break;
-				case "criar":
+				case "add":
 					criar(req, resp);
 				default:
 					req.getRequestDispatcher("ServicoListarAmbiente").forward(req, resp);
@@ -49,6 +48,8 @@ public class ServicoCriarAmbiente extends HttpServlet {
 		Collection<Comodo> comodos;
 		
 		try {
+			long id = Long.valueOf((String) req.getAttribute("contratoId"));
+			req.setAttribute("contratoId", id);
 			comodos = Comodo.buscarTodos();
 		} catch (ClassNotFoundException e) {
 			comodos = new ArrayList<Comodo>();
@@ -60,13 +61,13 @@ public class ServicoCriarAmbiente extends HttpServlet {
 		
 		req.setAttribute("comodos", comodos);
 		
-		req.getRequestDispatcher("WEB-INF/ambiente/CriarAmbiente.jsp").forward(req, resp);
+		req.getRequestDispatcher("WEB-INF/ambiente/AdicionarAmbiente.jsp").forward(req, resp);
 	}
 	
 	private void criar(HttpServletRequest req, HttpServletResponse resp) {
 		
 		try{
-			float comissao = Float.valueOf(req.getParameter("comissao"));
+			long id = Long.valueOf(req.getParameter("contratoId"));
 			int numParedes = Integer.valueOf(req.getParameter("numParedes"));
 			int numPortas = Integer.valueOf(req.getParameter("numPortas"));
 			float metragem = Integer.valueOf(req.getParameter("metragem"));
@@ -91,10 +92,8 @@ public class ServicoCriarAmbiente extends HttpServlet {
 			}
 			
 			Ambiente ambiente = new Ambiente(numParedes, numPortas, metragem);
-			Contrato contrato = new Contrato(comissao);
-			ambiente.setContrato(contrato);
-			ambiente.adicionar(mobIds, mobquant);
-			req.setAttribute("message", "Ambiente criada com sucesso!");
+			ambiente.adicionarNovo(id, mobIds, mobquant);
+			req.setAttribute("message", "Ambiente adicionado com sucesso!");
 		}catch(ClassNotFoundException cnfe){
 			req.setAttribute("erro", "falha no servidor!");
 		}catch(RelacaoException re){
@@ -130,7 +129,9 @@ public class ServicoCriarAmbiente extends HttpServlet {
 			req.setAttribute("erro", "Falhar na base de dados.");
 			e.printStackTrace();
 		} finally {
-			req.getRequestDispatcher("WEB-INF/ambiente/CriarAmbiente.jsp").forward(req, resp);
+			long id = Long.valueOf(req.getParameter("contratoId"));
+			req.setAttribute("contratoId", id);
+			req.getRequestDispatcher("WEB-INF/ambiente/AdicionarAmbiente.jsp").forward(req, resp);
 		}
 	}
 }
